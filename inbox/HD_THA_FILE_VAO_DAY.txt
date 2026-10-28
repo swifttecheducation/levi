@@ -1,0 +1,23 @@
+================================================================================
+📥 THƯ MỤC NHẬN NGUYÊN LIỆU ĐẦU VÀO (LEVI STUDIO INBOX)
+================================================================================
+
+Chào bạn! Đây là nơi bạn thả các file nguyên liệu để hệ thống AI tự động xử lý.
+
+1. FILE VIDEO CHÍNH (NÓI TRƯỚC ỐNG KÍNH / TALKING HEAD):
+   - Bạn chỉ cần thả file video thô vừa quay bằng điện thoại/máy ảnh vào thẳng đây!
+   - Định dạng hỗ trợ: .mp4, .mov, .m4v, .mkv
+   - Tỉ lệ khuyến nghị: 9:16 dọc (1080x1920 hoặc 4K) cho Reels, TikTok, Shorts
+   - Lưu ý: Hệ thống sẽ tự động quét và nhận diện video đầu tiên tìm thấy.
+
+2. CÁC THƯ MỤC NGUYÊN LIỆU PHỤ (TÙY CHỌN):
+   - `inbox/broll/`: Thả các cảnh quay minh họa, chèn B-roll (sẽ được AI tự chèn theo ngữ cảnh).
+   - `inbox/nhac_nen/`: Thả file nhạc nền (.mp3, .wav) nếu muốn dùng nhạc riêng (AI sẽ tự động ducking -18dB khi bạn nói).
+   - `inbox/logo_watermark/`: Thả logo cá nhân dạng PNG nền trong suốt để in lên góc video.
+
+3. SAU KHI THẢ VIDEO:
+   - Click đúp chuột vào file: `2_DUNG_VIDEO_TU_DONG_1_CHAM.bat` (để AI tự dựng từ A-Z)
+   - Hoặc click đúp file: `3_CHEDO_DAO_DIEN_HOI_TUNG_BUOC.bat` (nếu muốn chọn màu, J-Cut theo ý muốn)
+
+Chúc bạn tạo ra những thước phim triệu view đẳng cấp!
+================================================================================

@@ -42,14 +42,27 @@ from workflows.carousel_story.carousel import CarouselStoryGenerator
 
 
 def find_inbox_video(inbox_dir: str = "inbox") -> Optional[str]:
-    """Tự động tìm file video đầu tiên trong thư mục inbox/."""
+    """
+    Tự động tìm file video đầu tiên trong thư mục inbox/:
+    Hỗ trợ cả thả trực tiếp vào inbox/ hoặc trong các thư mục con (vd: inbox/video_chinh/).
+    """
     if not os.path.exists(inbox_dir):
         return None
     patterns = ["*.mp4", "*.mov", "*.m4v", "*.mkv"]
+    # 1. Tìm trực tiếp ngay trong inbox/
     for p in patterns:
         files = glob.glob(os.path.join(inbox_dir, p))
         if files:
             return files[0]
+
+    # 2. Tìm trong các thư mục con cấp 1 (vd: inbox/video_chinh/, inbox/raw/)
+    for p in patterns:
+        sub_files = glob.glob(os.path.join(inbox_dir, "*", p))
+        for f in sub_files:
+            folder_name = os.path.basename(os.path.dirname(f)).lower()
+            # Bỏ qua thư mục broll hoặc nhạc
+            if folder_name not in ["broll", "nhac_nen", "sfx", "logo_watermark"]:
+                return f
     return None
 
 

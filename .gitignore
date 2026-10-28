@@ -4,10 +4,14 @@ __pycache__/
 *$py.class
 
 # Output and temp files
+dist/
 outbox/*
+!outbox/**/.gitkeep
 !outbox/.gitkeep
 inbox/*
+!inbox/**/.gitkeep
 !inbox/.gitkeep
+!inbox/HD_THA_FILE_VAO_DAY.txt
 
 # Node.js
 node_modules/
