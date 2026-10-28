@@ -1,0 +1,167 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+studio.py — CLI ĐIỀU HÀNH TRUNG TÂM (LEVI SUPER STUDIO MASTER CLI v4.0).
+Quản lý toàn bộ cỗ máy dựng phim đa kênh tự động:
+  - Autopilot: Dựng 1-chạm từ video thô trong inbox/
+  - Adobe Pro Lane: Xuất Premiere Pro XML & After Effects JSX
+  - CapCut Lane: Xuất dự án CapCut Desktop đa track
+  - Storyboard: Xuất ảnh Beat Sheet duyệt trước
+  - Carousel & Story Kit: Sinh bài đăng Instagram 4:5 và Story 9:16
+"""
+
+import os
+import sys
+import argparse
+import glob
+from typing import Optional
+
+# Bắt buộc UTF-8 trên Windows console
+for _s in (sys.stdout, sys.stderr):
+    if hasattr(_s, "reconfigure"):
+        try:
+            _s.reconfigure(encoding="utf-8")
+        except Exception:
+            pass
+
+HERE = os.path.dirname(os.path.abspath(__file__))
+if HERE not in sys.path:
+    sys.path.insert(0, HERE)
+
+from workflows.autopilot import AutopilotEngine
+from core.brand_engine import BrandEngine
+from engines.adobe.pr_xml_builder import PremiereXMLBuilder
+from engines.adobe.ae_script_generator import AfterEffectsScriptGenerator
+from workflows.beat_sheet import BeatSheetGenerator
+from workflows.carousel_story.carousel import CarouselStoryGenerator
+
+
+def find_inbox_video(inbox_dir: str = "inbox") -> Optional[str]:
+    """Tự động tìm file video đầu tiên trong thư mục inbox/."""
+    if not os.path.exists(inbox_dir):
+        return None
+    patterns = ["*.mp4", "*.mov", "*.m4v", "*.mkv"]
+    for p in patterns:
+        files = glob.glob(os.path.join(inbox_dir, p))
+        if files:
+            return files[0]
+    return None
+
+
+def main():
+    parser = argparse.ArgumentParser(
+        description="🎬 Levi Super Studio v4.0 — Master Video & Multi-Channel Automation Engine"
+    )
+    subparsers = parser.add_subparsers(dest="command", help="Lệnh thực thi")
+
+    # 1. Autopilot Command
+    ap_parser = subparsers.add_parser("autopilot", help="Chạy cỗ máy dựng 1-chạm từ A-Z")
+    ap_parser.add_argument("--video", "-v", type=str, default=None, help="Đường dẫn file video thô (hoặc tự quét inbox/)")
+    ap_parser.add_argument("--name", "-n", type=str, default="Levi_Project", help="Tên dự án")
+    ap_parser.add_argument("--headline", "-H", type=str, default=None, help="Tiêu đề câu Hook chính")
+    ap_parser.add_argument("--subtitles", "-s", type=str, default=None, help="File transcript JSON (nếu có sẵn)")
+
+    # 2. Premiere Pro XML Command
+    pr_parser = subparsers.add_parser("premiere", help="Chỉ xuất Timeline chuẩn cho Adobe Premiere Pro (.xml)")
+    pr_parser.add_argument("--video", "-v", type=str, required=True, help="Đường dẫn file video")
+    pr_parser.add_argument("--name", "-n", type=str, default="Premiere_Sequence", help="Tên sequence")
+
+    # 3. After Effects JSX Command
+    ae_parser = subparsers.add_parser("ae", help="Chỉ xuất ExtendScript JSX cho After Effects")
+    ae_parser.add_argument("--text", "-t", type=str, required=True, help="Câu Hook headline")
+    ae_parser.add_argument("--name", "-n", type=str, default="AE_Comp", help="Tên composition")
+
+    # 4. Beat Sheet Command
+    bs_parser = subparsers.add_parser("beat-sheet", help="Xuất bảng ảnh Storyboard duyệt nhanh trước khi render")
+    bs_parser.add_argument("--video", "-v", type=str, required=True, help="Đường dẫn video")
+
+    # 5. Carousel Command
+    car_parser = subparsers.add_parser("carousel", help="Sinh bộ bài đăng vuốt ngang Instagram Carousel")
+    car_parser.add_argument("--headline", "-H", type=str, default="Insight Mới", help="Tiêu đề slide 1")
+
+    # 6. Status Check
+    subparsers.add_parser("status", help="Kiểm tra môi trường và Brand Kit")
+
+    args = parser.parse_args()
+
+    if not args.command or args.command == "status":
+        print("\n" + "=" * 65)
+        print("🎬  LEVI SUPER STUDIO v4.0 — TRẠNG THÁI HỆ THỐNG")
+        print("=" * 65)
+        brand_path = os.path.join(HERE, "brand-kit.md")
+        brand = BrandEngine(brand_path)
+        print(f"✅ Thương hiệu   : {brand.brand['name']}")
+        print(f"🎨 Bộ phong cách : {brand.brand['style_pack']}")
+        print(f"🔤 Font chữ      : Headline: {brand.get_fonts()['headline']} | Body: {brand.get_fonts()['caption']}")
+        print(f"🔊 Chuẩn âm thanh: EBU R128 ({brand.get_audio_standards()['target_lufs']} LUFS)")
+        inbox_vid = find_inbox_video(os.path.join(HERE, "inbox"))
+        print(f"📥 Video trong inbox/: {inbox_vid if inbox_vid else 'Chưa có (Hãy thả video vào inbox/)'}")
+        print("=" * 65 + "\n")
+        return
+
+    brand_file = os.path.join(HERE, "brand-kit.md")
+
+    if args.command == "autopilot":
+        target_video = args.video or find_inbox_video(os.path.join(HERE, "inbox"))
+        if not target_video:
+            print("❌ Lỗi: Không tìm thấy video trong inbox/ và bạn chưa chỉ định --video!")
+            print("👉 Hãy thả video vào thư mục 'inbox/' hoặc chạy:")
+            print("   python studio.py autopilot --video duong/dan/video.mp4")
+            sys.exit(1)
+
+        engine = AutopilotEngine(brand_kit_path=brand_file)
+        engine.run_autopilot(
+            video_path=target_video,
+            project_name=args.name,
+            headline=args.headline,
+            transcript_json_path=args.subtitles
+        )
+
+    elif args.command == "premiere":
+        pr = PremiereXMLBuilder(sequence_name=args.name)
+        out_xml = os.path.join(HERE, "outbox", f"{args.name}.xml")
+        pr.generate_xml_timeline(
+            main_video_path=args.video,
+            cuts=[{"source_in": 0.0, "source_out": 10.0, "duration": 10.0}],
+            output_xml_path=out_xml
+        )
+        print(f"✅ Đã tạo Timeline Premiere Pro XML tại: {out_xml}")
+
+    elif args.command == "ae":
+        ae = AfterEffectsScriptGenerator(comp_name=args.name)
+        out_jsx = os.path.join(HERE, "outbox", f"{args.name}.jsx")
+        brand = BrandEngine(brand_file)
+        ae.generate_jsx_script(
+            hook_text=args.text,
+            subtitles=[{"start": 0.0, "end": 3.0, "text": args.text}],
+            brand_colors=brand.get_colors(),
+            output_jsx_path=out_jsx
+        )
+        print(f"✅ Đã tạo kịch bản After Effects ExtendScript tại: {out_jsx}")
+
+    elif args.command == "beat-sheet":
+        bs = BeatSheetGenerator()
+        out_jpg = os.path.join(HERE, "outbox", "beat_sheet.jpg")
+        bs.extract_and_generate_from_video(
+            video_path=args.video,
+            cuts=[{"source_in": 0.0, "duration": 3.0}, {"source_in": 3.0, "duration": 3.0}],
+            output_path=out_jpg
+        )
+        print(f"✅ Đã xuất Beat Sheet tại: {out_jpg}")
+
+    elif args.command == "carousel":
+        brand = BrandEngine(brand_file)
+        car = CarouselStoryGenerator(brand_colors=brand.get_colors())
+        slides = car.generate_carousel_slides(
+            [
+                {"title": args.headline, "body": "Bí quyết dựng video đa kênh chuẩn điện ảnh."},
+                {"title": "Làn Kép Song Song", "body": "CapCut cho bản nhanh, Premiere & AE cho bản rạp."},
+                {"title": "Hành Động Ngay", "body": "Inbox LEVI để nhận toàn bộ mã nguồn."}
+            ],
+            output_dir=os.path.join(HERE, "outbox", "carousel")
+        )
+        print(f"✅ Đã xuất {len(slides)} slides Carousel tại: outbox/carousel/")
+
+
+if __name__ == "__main__":
+    main()

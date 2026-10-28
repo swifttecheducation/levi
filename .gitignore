@@ -1,0 +1,18 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Output and temp files
+outbox/*
+!outbox/.gitkeep
+inbox/*
+!inbox/.gitkeep
+
+# Node.js
+node_modules/
+.npm/
+
+# OS generated
+.DS_Store
+Thumbs.db

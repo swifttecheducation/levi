@@ -1,0 +1,17 @@
+{
+  "name": "levi-remotion-studio",
+  "version": "4.0.0",
+  "description": "60fps GPU Graphics Studio for Levi Super Studio",
+  "scripts": {
+    "build": "remotion bundle",
+    "studio": "remotion preview",
+    "render": "remotion render"
+  },
+  "dependencies": {
+    "@remotion/bundler": "^4.0.0",
+    "@remotion/cli": "^4.0.0",
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "remotion": "^4.0.0"
+  }
+}
