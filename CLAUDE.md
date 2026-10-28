@@ -48,6 +48,12 @@ python studio.py beat-sheet -v inbox/raw_video.mp4
 
 # 9. Tạo bộ bài đăng Instagram Carousel
 python studio.py carousel -H "3 Tư Duy Dựng Phim Đột Phá"
+
+# 10. Phân tích công thức video mẫu (Style Cloner Recipe)
+python studio.py analyze --ref inbox/reference_video.mp4
+
+# 11. Clone phong cách video mẫu sang video thô
+python studio.py clone --ref inbox/reference_video.mp4 -v inbox/raw_video.mp4
 ```
 
 ---

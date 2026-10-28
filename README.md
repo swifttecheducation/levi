@@ -38,6 +38,7 @@ Mọi quy trình và tính năng đều có tài liệu hướng dẫn chuyên s
 
 | Tài Liệu Hướng Dẫn | Nội Dung Chi Tiết |
 | :--- | :--- |
+| 🧬 **[Kỹ Năng Clone Phong Cách Video](docs/SKILL_VIDEO_STYLE_CLONER.md)** | Phân tích video mẫu, trích xuất fingerprint (cắt, zoom, safe-zone, 3D vector) theo 5 công nghệ hàng đầu |
 | 🔤 **[Danh Mục 32 Font Chữ Việt Hóa](docs/DANH_MUC_FONT_CHU.md)** | Tra cứu chi tiết 14 họ font (Instrument Serif, Be Vietnam Pro, Inter...), 6 bộ phối mẫu |
 | 🌟 **[Thư Viện 105 Phong Cách Dựng Video](docs/THU_VIEN_PHONG_CACH.md)** | Tích hợp 105 phong cách từ Xưởng dựng rảnh tay (siatruong.com), 10 nhóm và 5 bộ phối mẫu |
 | 🎨 **[Quy Trình Brand Kit 7 Trụ Cột](docs/FLOW_BRAND_KIT.md)** | Phỏng vấn chuyên sâu định vị, Voice DNA, từ cấm kỵ và sửa lỗi phiên âm |
@@ -83,6 +84,8 @@ python studio.py autopilot
 | **"thư viện phong cách"** / **"styles"** | `python studio.py styles` | Tra cứu 105 phong cách dựng video (Hooks, Bố cục, FX, Bằng chứng, Màu sắc) |
 | **"kho font chữ"** / **"fonts"** | `python studio.py fonts` | Tra cứu 32 font chữ Việt hóa (14 họ font), 6 bộ phối font khuyên dùng |
 | **"chế độ đạo diễn"** / **"director"** | `python studio.py director` | Luồng khoa học hỏi ý kiến bạn từng bước (Màu sắc, J-Cut, SFX, Export) |
+| **"học phong cách video"** / **"clone style"** | `python studio.py clone --ref <link_hoặc_file>` | Tự động phân tích video mẫu và áp dụng phong cách sang video trong `inbox/` |
+| **"phân tích video mẫu"** / **"analyze"** | `python studio.py analyze --ref <link_hoặc_file>` | Trích xuất công thức dựng (cadence, zoom bezier, safe-zone) thành file Markdown |
 | **"dựng video"** / **"autopilot"** | `python studio.py autopilot` | Dựng tự động toàn diện 1-chạm từ A-Z cho video trong `inbox/` |
 | **"xuất premiere"** | `python studio.py premiere -v <video>` | Xuất Timeline FCPXML mở trực tiếp trong Adobe Premiere Pro |
 | **"xuất after effects"** | `python studio.py ae -t "<câu_hook>"` | Xuất kịch bản After Effects ExtendScript JSX nảy lò xo |

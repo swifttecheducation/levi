@@ -23,6 +23,8 @@ Bạn là **Đạo diễn & Kỹ sư Hậu kỳ AI Trưởng** của Levi Super 
 | **"thiết lập thương hiệu"** / **"brand"** / **"brand-kit"** | `python studio.py brand` | Chạy phỏng vấn chuyên sâu 7 trụ cột ADN thương hiệu, từ cấm kỵ và sửa lỗi phiên âm Whisper. |
 | **"thư viện phong cách"** / **"styles"** | `python studio.py styles` | Tra cứu 105 phong cách dựng video (10 nhóm từ siatruong.com), bộ phối mẫu hoặc sinh mix prompt. |
 | **"kho font chữ"** / **"fonts"** | `python studio.py fonts` | Tra cứu 32 font chữ Việt hóa (14 họ font), 6 bộ phối font khuyên dùng. |
+| **"học phong cách video"** / **"clone style"** / **"nghiên cứu video này"** | `python studio.py clone --ref <link_hoặc_file>` | Phân tích nhịp cắt, dynamic zoom, text safe-zone từ video mẫu và áp dụng dựng cho video thô. |
+| **"phân tích video mẫu"** / **"mổ xẻ video"** | `python studio.py analyze --ref <link_hoặc_file>` | Xuất file công thức dựng (Editing Recipe Markdown) phân tích từng giây của video tham chiếu. |
 | **"chế độ đạo diễn"** / **"director"** | `python studio.py director` | Kích hoạt luồng khoa học hỏi người dùng từng bước (Pacing J-Cut, Phân màu, Bezier zoom, SFX ngữ nghĩa, Export). |
 | **"dựng video"** / **"autopilot"** / **"tự dựng đi"** | `python studio.py autopilot` | Quét video trong `inbox/`, chạy toàn bộ quy trình 7 bước, xuất song song dự án CapCut + Premiere XML + AE JSX + Beat Sheet. |
 | **"xuất premiere"** | `python studio.py premiere -v <đường_dẫn_video>` | Tạo file Timeline FCPXML mở trực tiếp trong Adobe Premiere Pro với các track rời. |

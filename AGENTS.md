@@ -14,6 +14,8 @@
 | **"thiết lập thương hiệu"** / **"brand"** | `python studio.py brand` | Phỏng vấn chuyên sâu 7 trụ cột ADN thương hiệu và bảng sửa lỗi phiên âm. |
 | **"thư viện phong cách"** / **"styles"** | `python studio.py styles` | Tra cứu 105 phong cách dựng video, phối mã phong cách và bộ phối mẫu. |
 | **"kho font chữ"** / **"fonts"** | `python studio.py fonts` | Tra cứu kho 32 font chữ Việt hóa 100%, 14 họ font và 6 bộ phối font. |
+| **"học phong cách video"** / **"clone style"** / **"nghiên cứu video này"** | `python studio.py clone --ref <link_hoặc_file>` | Tự động phân tích video mẫu và áp dụng phong cách sang video thô trong `inbox/`. |
+| **"phân tích video mẫu"** / **"analyze"** | `python studio.py analyze --ref <link_hoặc_file>` | Trích xuất công thức dựng (cadence, zoom bezier, safe-zone) thành file Markdown. |
 | **"chế độ đạo diễn"** / **"director"** | `python studio.py director` | Luồng khoa học hỏi ý kiến bạn từng bước (Màu sắc, J-Cut, SFX, Export). |
 | **"dựng video"** / **"autopilot"** / **"tự dựng đi"** | `python studio.py autopilot` | Quét video thô trong `inbox/`, tự động cắt dead-air, cân bằng âm thanh EBU R128 (-14 LUFS), khóa cằm né mặt bằng YuNet, xuất song song CapCut Desktop và Adobe Premiere/AE. |
 | **"xuất premiere"** | `python studio.py premiere -v <video>` | Tạo file Timeline FCPXML / Premiere XML chuẩn mở trực tiếp trong Adobe Premiere Pro với đầy đủ track video, B-roll và audio riêng biệt. |

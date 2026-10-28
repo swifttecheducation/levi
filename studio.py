@@ -40,6 +40,8 @@ from engines.adobe.pr_xml_builder import PremiereXMLBuilder
 from engines.adobe.ae_script_generator import AfterEffectsScriptGenerator
 from workflows.beat_sheet import BeatSheetGenerator
 from workflows.carousel_story.carousel import CarouselStoryGenerator
+from core.video_renderer import VideoRenderer
+from core.style_cloner import StyleClonerEngine, ReferenceVideoAnalyzer
 
 
 def find_inbox_video(inbox_dir: str = "inbox") -> Optional[str]:
@@ -88,6 +90,13 @@ def main():
     ap_parser.add_argument("--headline", "-H", type=str, default=None, help="Tiêu đề câu Hook chính")
     ap_parser.add_argument("--subtitles", "-s", type=str, default=None, help="File transcript JSON (nếu có sẵn)")
     ap_parser.add_argument("--mix", "-m", type=str, default=None, help="Mã phong cách từ Thư viện 105 phong cách (vd: H1,C1,L1,X5)")
+    ap_parser.add_argument("--render", "-r", action="store_true", help="Render trực tiếp video thành phẩm MP4 vào outbox/video_hoan_thien/")
+
+    # 3. Direct Render Command
+    rend_parser = subparsers.add_parser("render", help="Render video hoàn thiện MP4 trực tiếp bằng GPU/CPU")
+    rend_parser.add_argument("--video", "-v", type=str, default=None, help="Đường dẫn video (hoặc tự quét inbox/)")
+    rend_parser.add_argument("--name", "-n", type=str, default="Levi_Final", help="Tên video đầu ra")
+    rend_parser.add_argument("--look", "-l", type=str, default="teal_orange", help="Phong cách màu điện ảnh (teal_orange, kodak_film, clean_corporate)")
 
     # 3. Premiere Pro XML Command
     pr_parser = subparsers.add_parser("premiere", help="Chỉ xuất Timeline chuẩn cho Adobe Premiere Pro (.xml)")
@@ -130,6 +139,17 @@ def main():
     fonts_p = subparsers.add_parser("fonts", help="Tra cứu toàn bộ kho 32 font chữ Việt hóa & 14 họ font")
     fonts_p.add_argument("--list", "-l", action="store_true", help="Liệt kê 14 họ font & các tệp font chi tiết")
     fonts_p.add_argument("--packs", "-p", action="store_true", help="Xem 6 bộ phối font chữ gợi ý")
+
+    # 12. Style Cloner & Reference Analyzer Command
+    clone_p = subparsers.add_parser("clone", help="Sao chép phong cách biên tập từ video mẫu (MotionClone + HyperFrames)")
+    clone_p.add_argument("--ref", "-r", type=str, required=True, help="Đường dẫn file video mẫu tham chiếu")
+    clone_p.add_argument("--video", "-v", type=str, default=None, help="Đường dẫn video thô cần dựng (hoặc quét inbox/)")
+    clone_p.add_argument("--name", "-n", type=str, default="Cloned_Project", help="Tên dự án")
+    clone_p.add_argument("--render", action="store_true", help="Render trực tiếp video thành phẩm MP4")
+
+    # 13. Analyze Reference Only Command
+    ana_p = subparsers.add_parser("analyze", help="Phân tích dấu vân tay biên tập của video tham chiếu")
+    ana_p.add_argument("--ref", "-r", type=str, required=True, help="Đường dẫn file video mẫu")
 
     args = parser.parse_args()
 
@@ -245,6 +265,58 @@ def main():
         print("=" * 65 + "\n")
         return
 
+    if args.command == "analyze":
+        if not os.path.exists(args.ref):
+            print(f"❌ Lỗi: Không tìm thấy file video mẫu tại: {args.ref}")
+            sys.exit(1)
+        cloner = StyleClonerEngine()
+        res = cloner.clone_style_from_reference(args.ref)
+        print("\n" + res["recipe_markdown"])
+        return
+
+    if args.command == "clone":
+        if not os.path.exists(args.ref):
+            print(f"❌ Lỗi: Không tìm thấy file video mẫu tại: {args.ref}")
+            sys.exit(1)
+
+        target_video = args.video or find_inbox_video(os.path.join(HERE, "inbox"))
+        if not target_video:
+            print("❌ Lỗi: Không tìm thấy video thô cần dựng trong inbox/ và chưa truyền --video!")
+            sys.exit(1)
+
+        print("\n" + "=" * 65)
+        print("🎬 BƯỚC 1/2: PHÂN TÍCH DẤU VÂN TAY BIÊN TẬP VIDEO MẪU")
+        print("=" * 65)
+        cloner = StyleClonerEngine()
+        recipe_out = os.path.join(HERE, "outbox", f"{args.name}_cloned_recipe.md")
+        res = cloner.clone_style_from_reference(args.ref, output_recipe_path=recipe_out)
+        print(res["recipe_markdown"])
+        print(f"📄 Đã lưu bản công thức sao chép tại: {recipe_out}\n")
+
+        print("=" * 65)
+        print(f"🎬 BƯỚC 2/2: ÁP DỤNG CÔNG THỨC VÀO VIDEO: {os.path.basename(target_video)}")
+        print("=" * 65)
+        mix_codes = res["suggested_mix_codes"]
+        ap = AutopilotEngine(brand_kit_path=brand_file)
+        ap_res = ap.run_autopilot(
+            video_path=target_video,
+            project_name=args.name
+        )
+
+        if getattr(args, "render", False):
+            print("\n" + "=" * 65)
+            print("🎬 KÍCH HOẠT RENDER TRỰC TIẾP VIDEO MP4 THEO PHONG CÁCH SAO CHÉP")
+            print("=" * 65)
+            final_mp4 = os.path.join(HERE, "outbox", "video_hoan_thien", f"{args.name}_Cloned_Final.mp4")
+            rend = VideoRenderer(color_look="teal_orange")
+            rend.render_final_video(video_path=target_video, output_path=final_mp4)
+            print(f"🎉 Video hoàn thiện sao chép phong cách đã sẵn sàng tại: {final_mp4}\n")
+
+        print("=" * 65)
+        print("🎉 HOÀN TẤT SAO CHÉP PHONG CÁCH THÀNH CÔNG!")
+        print("=" * 65 + "\n")
+        return
+
     if args.command == "director":
         target_video = args.video or find_inbox_video(os.path.join(HERE, "inbox"))
         if not target_video:
@@ -269,12 +341,41 @@ def main():
             sys.exit(1)
 
         engine = AutopilotEngine(brand_kit_path=brand_file)
-        engine.run_autopilot(
+        result = engine.run_autopilot(
             video_path=target_video,
             project_name=args.name,
             headline=args.headline,
             transcript_json_path=args.subtitles
         )
+
+        if getattr(args, "render", False):
+            print("\n" + "=" * 65)
+            print("🎬 KÍCH HOẠT RENDER VIDEO THÀNH PHẨM (DIRECT RENDER)")
+            print("=" * 65)
+            final_mp4 = os.path.join(HERE, "outbox", "video_hoan_thien", f"{args.name}_Final.mp4")
+            renderer = VideoRenderer()
+            renderer.render_final_video(
+                video_path=target_video,
+                output_path=final_mp4
+            )
+            print(f"🎉 Video hoàn thiện đã sẵn sàng tại: {final_mp4}\n")
+
+    elif args.command == "render":
+        target_video = args.video or find_inbox_video(os.path.join(HERE, "inbox"))
+        if not target_video:
+            print("❌ Lỗi: Không tìm thấy video trong inbox/ và bạn chưa chỉ định --video!")
+            sys.exit(1)
+
+        print("\n" + "=" * 65)
+        print(f"🎬 BẮT ĐẦU RENDER VIDEO HOÀN THIỆN: {args.name}")
+        print("=" * 65)
+        final_mp4 = os.path.join(HERE, "outbox", "video_hoan_thien", f"{args.name}.mp4")
+        renderer = VideoRenderer(color_look=args.look)
+        renderer.render_final_video(
+            video_path=target_video,
+            output_path=final_mp4
+        )
+        print(f"🎉 Đã xuất video hoàn thiện tại: {final_mp4}\n")
 
     elif args.command == "premiere":
         pr = PremiereXMLBuilder(sequence_name=args.name)

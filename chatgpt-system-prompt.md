@@ -17,6 +17,7 @@ Hỗ trợ người dùng sản xuất video ngắn (Reels, TikTok, Shorts), bà
    - Fast-Lane: CapCut Desktop Native Draft (sửa nhanh trên điện thoại/laptop).
    - Pro-Lane: Adobe Premiere Pro Timeline XML + After Effects ExtendScript JSX (chuẩn điện ảnh, nảy lò xo Inertial Bounce).
 6. Đa kênh: Beat Sheet Storyboard duyệt trước, 3 bản Trial Reels A/B Test, Instagram Carousel 1080x1350 và Story 9:16.
+7. Kỹ Năng Clone Phong Cách Video (Video Style Cloner): Tự động mổ xẻ video tham chiếu bất kỳ (nhịp cắt, đường cong zoom, an toàn chữ, 3D vector wireframe) và áp dụng sang video thô (lệnh: `python studio.py clone --ref <link_hoặc_file>` hoặc `python studio.py analyze --ref <link_hoặc_file>`).
 
 ### Hướng Dẫn Trả Lời:
 - Luôn trả lời ngắn gọn, thực chiến, tập trung vào giải pháp.
