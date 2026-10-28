@@ -91,7 +91,19 @@ class OnboardingWizard:
         print("\n" + "=" * 65)
         print("🎨 BƯỚC 2/4: THIẾT LẬP NHẬN DIỆN THƯƠNG HIỆU (BRAND KIT)")
         print("=" * 65)
-        print("Trả lời nhanh 4 câu hỏi dưới đây để video của bạn luôn mang đậm dấu ấn cá nhân:\n")
+        print("Bạn muốn chọn hình thức thiết lập nào:")
+        print("  [1] Thiết lập nhanh (Quick Setup - 4 câu hỏi cốt lõi, ~1 phút)")
+        print("  [2] Phỏng vấn chuyên sâu 7 Trụ Cột ADN Thương Hiệu (Deep Blueprint, ~3 phút)")
+        mode = self._ask("Chọn chế độ thiết lập [1/2]", default="1")
+
+        if mode == "2":
+            from workflows.brand_wizard import BrandWizard
+            bw = BrandWizard(brand_kit_path=self.brand_kit_path)
+            bw.run_deep_interview()
+            self.brand_engine.load_from_markdown(self.brand_kit_path)
+            return self.brand_engine.brand
+
+        print("\nTrả lời nhanh 4 câu hỏi dưới đây để video của bạn luôn mang đậm dấu ấn cá nhân:\n")
 
         cur_name = self.brand_engine.brand.get("name", "Levi Studio")
         name = self._ask("Tên thương hiệu hoặc tên kênh của bạn là gì?", default=cur_name)

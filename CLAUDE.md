@@ -19,19 +19,28 @@ Khi người dùng mở phiên làm việc trong Claude Code hoặc Claude Deskt
 # 1. Kiểm tra trạng thái hệ thống
 python studio.py status
 
-# 2. Kích hoạt dựng tự động toàn diện
+# 2. Quy trình Onboarding & Thiết lập ban đầu
+python studio.py onboard
+
+# 3. Phỏng vấn chuyên sâu 7 Trụ Cột Brand Kit
+python studio.py brand
+
+# 4. Kích hoạt chế độ Đạo diễn tương tác 5 bước
+python studio.py director
+
+# 5. Kích hoạt dựng tự động toàn diện
 python studio.py autopilot
 
-# 3. Xuất nhanh Timeline Premiere Pro
+# 6. Xuất nhanh Timeline Premiere Pro
 python studio.py premiere -v inbox/raw_video.mp4 -n "Du_An_1"
 
-# 4. Xuất kịch bản After Effects JSX
+# 7. Xuất kịch bản After Effects JSX
 python studio.py ae -t "Bí Quyết Xây Kênh Triệu View" -n "AE_Reel"
 
-# 5. Xuất Storyboard Beat Sheet
+# 8. Xuất Storyboard Beat Sheet
 python studio.py beat-sheet -v inbox/raw_video.mp4
 
-# 6. Tạo bộ bài đăng Instagram Carousel
+# 9. Tạo bộ bài đăng Instagram Carousel
 python studio.py carousel -H "3 Tư Duy Dựng Phim Đột Phá"
 ```
 
