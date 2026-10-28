@@ -82,27 +82,63 @@ class BrandWizard:
         )
 
         # TRỤ CỘT 5: THỊ GIÁC, FONT CHỮ & BẢNG MÀU
-        print("\n📌 [TRỤ CỘT 5/7] PHONG CÁCH THỊ GIÁC, FONT CHỮ & BẢNG MÀU")
-        print("  [1] Editorial Luxe (Tạp chí Sang trọng: Playfair Display + Caveat + Be Vietnam Pro)")
-        print("  [2] Modern Minimal (Tối giản Hiện đại: Inter Black + Space Grotesk + Be Vietnam Pro)")
-        print("  [3] Gen Z Pop (Năng động Phá cách: Poppins Black + Caveat + Be Vietnam Pro)")
-        style_choice = self._ask("Chọn bộ phong cách [1/2/3]", default="1")
+        print("\n📌 [TRỤ CỘT 5/7] PHONG CÁCH THỊ GIÁC, FONT CHỮ & BẢNG MÀU (KHO 32 FONT VIỆT HÓA)")
+        print("  [1] Editorial Luxe (Tạp chí Sang trọng: Instrument Serif + Be Vietnam Pro + Caveat)")
+        print("  [2] Apple Minimal (Tối giản Hiện đại: Inter + Be Vietnam Pro + Space Grotesk)")
+        print("  [3] Gen Z Pop (Năng động Phá cách: Poppins + Be Vietnam Pro + SVN-Chicken Noodle Soup)")
+        print("  [4] Bold Streetwear (Đậm đà Viral: Coolvetica + Be Vietnam Pro + Caveat)")
+        print("  [5] Classic Elegance (Cổ điển Quý phái: Playfair Display + Be Vietnam Pro + Pinyon Script)")
+        print("  [6] Deep Thinker (Tri thức Sâu sắc: Alegreya + DM Sans + Instrument Serif)")
+        print("  [7] Tự chỉ định font riêng (Custom Font)")
+        style_choice = self._ask("Chọn bộ phong cách [1-7]", default="1")
 
         if style_choice == "2":
-            style_name = "Modern Minimal"
+            style_name = "Apple Minimal"
             head_font = "Inter"
+            cap_font = "Be Vietnam Pro"
             accent_font = "Space Grotesk"
             p_color, s_color = "#FFFFFF", "#121212"
             default_codes = "H10, C8, L4, V15, X6, M1, S1, G4"
         elif style_choice == "3":
             style_name = "Gen Z Pop"
             head_font = "Poppins"
-            accent_font = "Caveat"
+            cap_font = "Be Vietnam Pro"
+            accent_font = "SVN-Chicken Noodle Soup"
             p_color, s_color = "#FFE600", "#1E1E24"
             default_codes = "H8, C2, L3, V7, X14, M1, S1, G3"
+        elif style_choice == "4":
+            style_name = "Bold Streetwear"
+            head_font = "Coolvetica"
+            cap_font = "Be Vietnam Pro"
+            accent_font = "Caveat"
+            p_color, s_color = "#FFFFFF", "#0A0A0A"
+            default_codes = "H1, C2, L1, V3, X5, M5, S1, G1"
+        elif style_choice == "5":
+            style_name = "Classic Elegance"
+            head_font = "Playfair Display"
+            cap_font = "Be Vietnam Pro"
+            accent_font = "Pinyon Script"
+            p_color, s_color = "#F7F4EF", "#1C1917"
+            default_codes = "H4, C7, L1, X16, M4, S1, G6"
+        elif style_choice == "6":
+            style_name = "Deep Thinker"
+            head_font = "Alegreya"
+            cap_font = "DM Sans"
+            accent_font = "Instrument Serif"
+            p_color, s_color = "#FBF7F0", "#1D1A16"
+            default_codes = "H6, C9, L5, P1, V18, X10, M3, S1, G5"
+        elif style_choice == "7":
+            style_name = "Custom Brand"
+            head_font = self._ask("Nhập tên font tiêu đề chính (Headline font)", default="Instrument Serif")
+            cap_font = self._ask("Nhập tên font phụ đề (Caption font)", default="Be Vietnam Pro")
+            accent_font = self._ask("Nhập tên font tạo điểm nhấn (Accent font)", default="Caveat")
+            p_color = self._ask("Mã màu nền chính (Primary HEX)", default="#F2EDE4")
+            s_color = self._ask("Mã màu tương phản (Secondary HEX)", default="#212C1B")
+            default_codes = "H1, C1, L1, X5, M1, G1"
         else:
             style_name = "Editorial Luxe"
-            head_font = "Playfair Display"
+            head_font = "Instrument Serif"
+            cap_font = "Be Vietnam Pro"
             accent_font = "Caveat"
             p_color, s_color = "#F2EDE4", "#212C1B"
             default_codes = "H4, C7, L1, X16, M4, S1, G6"
@@ -162,7 +198,7 @@ Tệp này là **Trụ Sở Thương Hiệu (Brand Homebase)** toàn diện củ
 - **Bộ phong cách đang sử dụng:** {style_name}
 - **Mã phong cách dựng video:** {', '.join(selected_codes)}
 - **Font tiêu đề chính (Headline font):** {head_font}
-- **Font phụ đề (Caption font):** Be Vietnam Pro
+- **Font phụ đề (Caption font):** {cap_font}
 - **Font tạo điểm nhấn (Accent font):** {accent_font}
 - **Bảng màu chủ đạo (Color Palette):**
   - Màu nền chính (Primary): `{p_color}`

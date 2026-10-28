@@ -113,23 +113,44 @@ class OnboardingWizard:
             default="Nhà sáng tạo nội dung, Marketer và Chuyên gia số"
         )
 
-        print("\nChọn bộ phong cách thị giác & font chữ yêu thích:")
-        print("  [1] Editorial Luxe (Tạp chí Sang trọng: Playfair Display + Caveat + Be Vietnam Pro)")
-        print("  [2] Modern Minimal (Tối giản Hiện đại: Inter Black + Space Grotesk + Be Vietnam Pro)")
-        print("  [3] Gen Z Pop (Năng động, Phá cách: Poppins Black + Caveat + Be Vietnam Pro)")
-        style_choice = self._ask("Chọn phong cách [1/2/3]", default="1")
+        print("\nChọn bộ phong cách thị giác & font chữ yêu thích (từ kho 32 font Việt hóa):")
+        print("  [1] Editorial Luxe (Tạp chí Sang trọng: Instrument Serif + Be Vietnam Pro + Caveat)")
+        print("  [2] Apple Minimal (Tối giản Hiện đại: Inter + Be Vietnam Pro + Space Grotesk)")
+        print("  [3] Gen Z Pop (Năng động Phá cách: Poppins + Be Vietnam Pro + SVN-Chicken Noodle Soup)")
+        print("  [4] Bold Streetwear (Đậm đà Viral: Coolvetica + Be Vietnam Pro + Caveat)")
+        print("  [5] Classic Elegance (Cổ điển Quý phái: Playfair Display + Be Vietnam Pro + Pinyon Script)")
+        print("  [6] Deep Thinker (Tri thức Sâu lắng: Alegreya + DM Sans + Instrument Serif)")
+        style_choice = self._ask("Chọn phong cách [1-6]", default="1")
 
         if style_choice == "2":
-            style_name = "Modern Minimal"
+            style_name = "Apple Minimal"
             head_font = "Inter"
+            cap_font = "Be Vietnam Pro"
             accent_font = "Space Grotesk"
         elif style_choice == "3":
             style_name = "Gen Z Pop"
             head_font = "Poppins"
+            cap_font = "Be Vietnam Pro"
+            accent_font = "SVN-Chicken Noodle Soup"
+        elif style_choice == "4":
+            style_name = "Bold Streetwear"
+            head_font = "Coolvetica"
+            cap_font = "Be Vietnam Pro"
             accent_font = "Caveat"
+        elif style_choice == "5":
+            style_name = "Classic Elegance"
+            head_font = "Playfair Display"
+            cap_font = "Be Vietnam Pro"
+            accent_font = "Pinyon Script"
+        elif style_choice == "6":
+            style_name = "Deep Thinker"
+            head_font = "Alegreya"
+            cap_font = "DM Sans"
+            accent_font = "Instrument Serif"
         else:
             style_name = "Editorial Luxe"
-            head_font = "Playfair Display"
+            head_font = "Instrument Serif"
+            cap_font = "Be Vietnam Pro"
             accent_font = "Caveat"
 
         manychat = self._ask("Từ khóa kích hoạt chatbot ManyChat (ngăn cách bằng dấu phẩy)", default="LEVI, STUDIO, VIP")

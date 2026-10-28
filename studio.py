@@ -35,6 +35,7 @@ from workflows.onboarding import OnboardingWizard
 from workflows.brand_wizard import BrandWizard
 from core.brand_engine import BrandEngine
 from core.styles_library import StylesLibrary, CURATED_PRESETS
+from core.font_manager import FontManager, FONT_FAMILIES, CURATED_FONT_PACKS
 from engines.adobe.pr_xml_builder import PremiereXMLBuilder
 from engines.adobe.ae_script_generator import AfterEffectsScriptGenerator
 from workflows.beat_sheet import BeatSheetGenerator
@@ -125,6 +126,11 @@ def main():
     styles_p.add_argument("--mix", "-m", type=str, help="Tạo bản tóm tắt yêu cầu dựng từ danh sách mã phong cách (vd: H1,C1,L1,X5)")
     styles_p.add_argument("--presets", "-p", action="store_true", help="Xem các bộ phối mẫu gợi ý (Editorial, Apple, Hands-off Reels...)")
 
+    # 11. Font Catalog Command
+    fonts_p = subparsers.add_parser("fonts", help="Tra cứu toàn bộ kho 32 font chữ Việt hóa & 14 họ font")
+    fonts_p.add_argument("--list", "-l", action="store_true", help="Liệt kê 14 họ font & các tệp font chi tiết")
+    fonts_p.add_argument("--packs", "-p", action="store_true", help="Xem 6 bộ phối font chữ gợi ý")
+
     args = parser.parse_args()
 
     if not args.command or args.command == "status":
@@ -210,6 +216,32 @@ def main():
         print("   python studio.py styles -s \"apple\"       (Tìm phong cách kiểu Apple)")
         print("   python studio.py styles -m \"H1,C1,L1,X5\"  (Tạo yêu cầu dựng video)")
         print("   python studio.py styles -p               (Xem các bộ phối gợi ý)")
+        print("=" * 65 + "\n")
+        return
+
+    if args.command == "fonts":
+        fm = FontManager()
+        if args.packs:
+            print("\n" + "=" * 65)
+            print("🔤 6 BỘ PHỐI FONT CHỮ GỢI Ý (CURATED FONT PACKS):")
+            print("=" * 65)
+            for k, p in fm.list_packs().items():
+                print(f"🔹 [{k}] {p['name']}")
+                print(f"   Headline: {p['headline']} | Caption: {p['caption']} | Accent: {p['accent']}")
+                print(f"   Mô tả: {p['description']}\n")
+            print("=" * 65 + "\n")
+            return
+
+        print("\n" + "=" * 65)
+        print(f"🔤 KHO 32 TỆP FONT CHỮ VIỆT HÓA 100% ({fm.total_families} HỌ FONT)")
+        print("=" * 65)
+        for fam in fm.list_families():
+            print(f"📌 {fam['name']} — [{fam['category']}]")
+            print(f"   ↳ {fam['description']}")
+            print(f"   ↳ Files: {', '.join(fam['files'].values())}")
+            print(f"   ↳ Phù hợp nhất: {', '.join(fam['best_for'])}\n")
+        print("💡 Gợi ý lệnh tra cứu:")
+        print("   python studio.py fonts -p                (Xem 6 bộ phối font khuyên dùng)")
         print("=" * 65 + "\n")
         return
 

@@ -6,31 +6,30 @@ Tệp này là **Trụ Sở Thương Hiệu (Brand Homebase)** của bạn: quy 
 
 ## 1. Định vị thương hiệu (Brand Identity)
 - **Bạn và thương hiệu của bạn:** Levi Studio
-- **Bạn giúp ai, và giá trị họ nhận được là gì:** Giúp các nhà sáng tạo nội dung, Marketer và Doanh nghiệp tự động hóa sản xuất video đa kênh chuẩn điện ảnh (Reels, TikTok, YouTube Shorts, Carousel, Story).
+- **Bạn giúp ai, và giá trị họ nhận được là gì:** Nh? s?ng t?o n?i dung, Marketer v? Chuy?n gia s?
 - **Nơi bạn đăng tải nội dung:**
-  - Instagram: @levi.studio
-  - TikTok: @levi.studio
-  - YouTube: @LeviStudioAI
+  - Instagram: @levistudio
+  - TikTok: @levistudio
 
 ## 2. Giọng điệu thương hiệu (Voice & Tone)
-- **Mô tả giọng điệu:** Điềm tĩnh, sâu sắc, thực chiến, có chiều sâu tư duy, truyền cảm hứng và không giật tít câu view rẻ tiền.
+- **Mô tả giọng điệu:** Điềm tĩnh, sâu sắc, thực chiến, truyền cảm hứng và tinh tế.
 - **Gut check:** Người xem cảm thấy được khai sáng, nhận được giá trị thực tế áp dụng được ngay.
 
 ## 3. Phong cách thị giác & Font chữ (Visual & Typography)
-- **Bộ phong cách đang sử dụng:** Editorial Luxe (Tạp chí Sang trọng)
+- **Bộ phong cách đang sử dụng:** Editorial Luxe
 - **Font tiêu đề chính (Headline font):** Playfair Display
 - **Font phụ đề (Caption font):** Be Vietnam Pro
 - **Font tạo điểm nhấn (Accent font):** Caveat
 - **Bảng màu chủ đạo (Color Palette):**
-  - Màu nền chính (Primary): `#F2EDE4` (Kem Yến Mạch)
-  - Màu nền tương phản (Secondary): `#212C1B` (Xanh Thông Đậm)
-  - Màu nhấn (Accent): `#FFADBF` (Hồng Phấn)
-  - Màu nổi bật (Highlight): `#720000` (Đỏ Rượu Vang)
+  - Màu nền chính (Primary): `#F2EDE4`
+  - Màu nền tương phản (Secondary): `#212C1B`
+  - Màu nhấn (Accent): `#FFADBF`
+  - Màu nổi bật (Highlight): `#720000`
 
 ## 4. Chuẩn âm thanh phát sóng (Audio Standards)
 - **Mức âm lượng tích hợp (Integrated Loudness):** `-14.0 LUFS` (Chuẩn EBU R128 tối ưu cho Reels/TikTok)
-- **Mức đỉnh thực (True Peak):** `-1.5 dBTP` (Tuyệt đối không bị vỡ tiếng hay méo tiếng khi tải lên mạng xã hội)
-- **Nhạc nền ngầm (BGM Bed):** `-18.0 dB` (Tự động hạ âm ngầm mỗi khi giọng nói cất lên)
+- **Mức đỉnh thực (True Peak):** `-1.5 dBTP`
+- **Nhạc nền ngầm (BGM Bed):** `-18.0 dB`
 
 ## 5. Từ khóa kích hoạt tin nhắn tự động (ManyChat Triggers)
-- Danh sách từ khóa: `LEVI`, `STUDIO`, `VIP`, `WORKFLOW`
+- Danh sách từ khóa: LEVI, STUDIO, VIP

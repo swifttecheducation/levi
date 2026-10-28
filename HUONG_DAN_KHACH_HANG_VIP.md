@@ -81,7 +81,7 @@ Sau khi hệ thống báo dựng hoàn tất:
 - Hãy đảm bảo bạn đã từng mở phần mềm CapCut Desktop ít nhất một lần trên máy để CapCut tự tạo thư mục cấu hình mặc định.
 
 ### 4. Font chữ có bị lỗi tiếng Việt không?
-- Hoàn toàn **KHÔNG**. Levi Super Studio đã tích hợp sẵn 5 bộ font chữ Việt hóa 100% chuẩn điện ảnh (`Playfair Display`, `Be Vietnam Pro`, `Caveat`, `Inter`, `Poppins`), đảm bảo không bao giờ bị lỗi ô vuông hay nhảy dấu.
+- Hoàn toàn **KHÔNG**. Levi Super Studio đã tích hợp sẵn kho 32 tệp font chữ Việt hóa 100% chuẩn điện ảnh thuộc 14 họ font danh tiếng (`Instrument Serif`, `Be Vietnam Pro`, `Inter`, `Playfair Display`, `Poppins`, `Coolvetica`, `Caveat`, `SVN-Chicken Noodle Soup`, `Pinyon Script`, `DM Sans`, `Space Grotesk`, `Alegreya`, `Shrikhand`, `Julius Sans One`), đảm bảo không bao giờ bị lỗi ô vuông hay nhảy dấu tiếng Việt. Bạn có thể gõ `python studio.py fonts` để xem toàn bộ.
 
 ---
 

@@ -9,6 +9,7 @@ from .pacing_engine import PacingEngine
 from .motion_reframer import MotionReframer
 from .semantic_sound_visual import SemanticSoundVisual
 from .styles_library import StylesLibrary, CURATED_PRESETS
+from .font_manager import FontManager, FONT_FAMILIES, CURATED_FONT_PACKS
 
 __all__ = [
     "BrandEngine",
@@ -21,5 +22,8 @@ __all__ = [
     "MotionReframer",
     "SemanticSoundVisual",
     "StylesLibrary",
-    "CURATED_PRESETS"
+    "CURATED_PRESETS",
+    "FontManager",
+    "FONT_FAMILIES",
+    "CURATED_FONT_PACKS"
 ]

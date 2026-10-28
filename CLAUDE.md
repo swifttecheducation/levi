@@ -28,7 +28,10 @@ python studio.py brand
 # 4. Tra cứu Thư viện 105 phong cách dựng video (siatruong.com)
 python studio.py styles -p
 
-# 5. Kích hoạt chế độ Đạo diễn tương tác 5 bước
+# 5. Tra cứu Kho 32 font chữ Việt hóa & 6 bộ phối font
+python studio.py fonts -p
+
+# 6. Kích hoạt chế độ Đạo diễn tương tác 5 bước
 python studio.py director
 
 # 5. Kích hoạt dựng tự động toàn diện
