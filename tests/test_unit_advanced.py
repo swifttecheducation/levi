@@ -85,10 +85,19 @@ class TestAdvancedCinemaModules(unittest.TestCase):
     def test_interactive_studio_auto(self):
         # Chạy pipeline ở chế độ auto_mode
         studio = InteractiveStudio(auto_mode=True)
-        # Tạo file video giả lập để test
+        # Tạo file video hợp lệ 1s để ffprobe và ffmpeg không bị lỗi moov atom
         dummy_video = os.path.join(REPO_ROOT, "outbox", "dummy_test_video.mp4")
-        with open(dummy_video, "w") as f:
-            f.write("dummy")
+        import subprocess
+        subprocess.run(
+            ["ffmpeg", "-y", "-f", "lavfi", "-i", "color=c=black:s=320x240:d=1:r=25",
+             "-f", "lavfi", "-i", "anullsrc=r=44100:cl=mono", "-t", "1",
+             "-c:v", "libx264", "-pix_fmt", "yuv420p", "-c:a", "aac", dummy_video,
+             "-loglevel", "quiet"],
+            check=False
+        )
+        if not os.path.exists(dummy_video):
+            with open(dummy_video, "w") as f:
+                f.write("dummy")
 
         res = studio.run_scientific_pipeline(
             video_path=dummy_video,

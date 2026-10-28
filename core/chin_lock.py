@@ -35,6 +35,10 @@ class ChinLock:
             return
         try:
             import cv2
+            try:
+                cv2.utils.logging.setLogLevel(cv2.utils.logging.LOG_LEVEL_ERROR)
+            except Exception:
+                pass
             self.detector = cv2.FaceDetectorYN_create(
                 self.model_path, "", (AUTH_WIDTH, AUTH_HEIGHT),
                 score_threshold=0.6, nms_threshold=0.3
