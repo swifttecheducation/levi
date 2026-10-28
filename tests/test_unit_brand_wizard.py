@@ -37,6 +37,7 @@ class TestBrandWizard(unittest.TestCase):
             "Bạn có biết rằng...",               # 4. Intro hook
             "Hẹn gặp lại ở video tiếp theo!",    # 4. Outro CTA
             "2",                                 # 5. Modern Minimal (style choice)
+            "H10, C8, L4, V15, X6, M1, S1, G4",  # 5. Mã phong cách dựng video
             "Khóa Học Python Video Master",      # 6. Sản phẩm chính
             "Ebook 50 Prompt Video",             # 6. Quà tặng
             "PYTHON, AI, VIDEO",                 # 6. Từ khóa ManyChat
@@ -56,6 +57,7 @@ class TestBrandWizard(unittest.TestCase):
         self.assertIn("Không clickbait", engine.get_hard_rules())
         self.assertEqual(engine.get_voice_dna()["intro_hook"], "Bạn có biết rằng...")
         self.assertEqual(engine.get_fonts()["headline"], "Inter")
+        self.assertIn("H10", engine.get_style_codes())
         self.assertEqual(engine.get_offers()["main_product"], "Khóa Học Python Video Master")
         self.assertIn("PYTHON", engine.get_manychat_keywords())
 

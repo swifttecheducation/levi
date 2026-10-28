@@ -34,6 +34,7 @@ from workflows.interactive_studio import InteractiveStudio
 from workflows.onboarding import OnboardingWizard
 from workflows.brand_wizard import BrandWizard
 from core.brand_engine import BrandEngine
+from core.styles_library import StylesLibrary, CURATED_PRESETS
 from engines.adobe.pr_xml_builder import PremiereXMLBuilder
 from engines.adobe.ae_script_generator import AfterEffectsScriptGenerator
 from workflows.beat_sheet import BeatSheetGenerator
@@ -63,6 +64,7 @@ def main():
     dir_parser.add_argument("--video", "-v", type=str, default=None, help="Đường dẫn file video thô (hoặc tự quét inbox/)")
     dir_parser.add_argument("--name", "-n", type=str, default="Levi_Director_Project", help="Tên dự án")
     dir_parser.add_argument("--headline", "-H", type=str, default=None, help="Tiêu đề câu Hook chính")
+    dir_parser.add_argument("--mix", "-m", type=str, default=None, help="Mã phong cách từ Thư viện 105 phong cách (vd: H1,C1,L1,X5)")
     dir_parser.add_argument("--auto", action="store_true", help="Chạy tự động các lựa chọn khuyến nghị không cần hỏi")
 
     # 2. Autopilot Mode (TỰ ĐỘNG 1-CHẠM)
@@ -71,6 +73,7 @@ def main():
     ap_parser.add_argument("--name", "-n", type=str, default="Levi_Project", help="Tên dự án")
     ap_parser.add_argument("--headline", "-H", type=str, default=None, help="Tiêu đề câu Hook chính")
     ap_parser.add_argument("--subtitles", "-s", type=str, default=None, help="File transcript JSON (nếu có sẵn)")
+    ap_parser.add_argument("--mix", "-m", type=str, default=None, help="Mã phong cách từ Thư viện 105 phong cách (vd: H1,C1,L1,X5)")
 
     # 3. Premiere Pro XML Command
     pr_parser = subparsers.add_parser("premiere", help="Chỉ xuất Timeline chuẩn cho Adobe Premiere Pro (.xml)")
@@ -101,6 +104,14 @@ def main():
     subparsers.add_parser("brand", help="Phỏng vấn chuyên sâu thiết lập Brand Kit 7 trụ cột")
     subparsers.add_parser("brand-kit", help="Bí danh của brand")
 
+    # 10. Styles Library (105 Styles from Siatruong)
+    styles_p = subparsers.add_parser("styles", help="Thư viện 105 phong cách dựng video rảnh tay")
+    styles_p.add_argument("--list", "-l", action="store_true", help="Liệt kê 10 danh mục & 105 phong cách")
+    styles_p.add_argument("--cat", "-c", type=str, help="Xem chi tiết phong cách trong danh mục (H, C, L, P, V, B, X, M, S, G)")
+    styles_p.add_argument("--search", "-s", type=str, help="Tìm kiếm phong cách theo từ khóa")
+    styles_p.add_argument("--mix", "-m", type=str, help="Tạo bản tóm tắt yêu cầu dựng từ danh sách mã phong cách (vd: H1,C1,L1,X5)")
+    styles_p.add_argument("--presets", "-p", action="store_true", help="Xem các bộ phối mẫu gợi ý (Editorial, Apple, Hands-off Reels...)")
+
     args = parser.parse_args()
 
     if not args.command or args.command == "status":
@@ -111,6 +122,7 @@ def main():
         brand = BrandEngine(brand_path)
         print(f"✅ Thương hiệu   : {brand.brand['name']}")
         print(f"🎨 Bộ phong cách : {brand.brand['style_pack']}")
+        print(f"🏷️  Mã phong cách : {', '.join(brand.get_style_codes())}")
         print(f"🔤 Font chữ      : Headline: {brand.get_fonts()['headline']} | Body: {brand.get_fonts()['caption']}")
         print(f"🔊 Chuẩn âm thanh: EBU R128 ({brand.get_audio_standards()['target_lufs']} LUFS)")
         inbox_vid = find_inbox_video(os.path.join(HERE, "inbox"))
@@ -128,6 +140,64 @@ def main():
     if args.command in ["brand", "brand-kit"]:
         wizard = BrandWizard(brand_kit_path=brand_file)
         wizard.run_deep_interview()
+        return
+
+    if args.command == "styles":
+        sl = StylesLibrary()
+        if args.cat:
+            cat_id = args.cat.upper().strip()
+            styles = sl.get_styles_in_category(cat_id)
+            cat_name = sl.by_cat.get(cat_id, {}).get("name", cat_id)
+            print(f"\n📂 DANH MỤC [{cat_id}]: {cat_name} ({len(styles)} phong cách)")
+            print("=" * 65)
+            for it in styles:
+                print(f"👉 [{it['code']}] {it['name']}")
+                print(f"   {it['what']}\n")
+            return
+
+        if args.search:
+            res = sl.search_styles(args.search)
+            print(f"\n🔍 KẾT QUẢ TÌM KIẾM CHO: '{args.search}' ({len(res)} phong cách)")
+            print("=" * 65)
+            for it in res:
+                print(f"👉 [{it['code']}] {it['name']} ({it['cat_name']})")
+                print(f"   {it['what']}\n")
+            return
+
+        if args.mix:
+            codes = [c.strip().upper() for c in args.mix.split(",") if c.strip()]
+            prompt = sl.compose_mix_prompt(codes)
+            print("\n" + "=" * 65)
+            print("✨ BẢN TÓM TẮT YÊU CẦU DỰNG (MIX PROMPT):")
+            print("=" * 65)
+            print(prompt)
+            print("=" * 65 + "\n")
+            return
+
+        if args.presets:
+            print("\n" + "=" * 65)
+            print("🌟 BỘ PHỐI MẪU GỢI Ý (CURATED PRESETS):")
+            print("=" * 65)
+            for k, p in sl.list_presets().items():
+                print(f"🔹 [{k}] {p['name']}")
+                print(f"   Mã: {', '.join(p['codes'])}")
+                print(f"   Mô tả: {p['description']}\n")
+            return
+
+        # Mặc định hoặc --list: hiển thị tổng quan 10 danh mục
+        print("\n" + "=" * 65)
+        print(f"🎨 THƯ VIỆN 105 PHONG CÁCH DỰNG VIDEO (SIATRUONG.COM INTEGRATION)")
+        print(f"   Tổng cộng: {sl.total_count} phong cách phân chia thành 10 nhóm")
+        print("=" * 65)
+        for cat in sl.list_categories():
+            print(f"📁 [{cat['id']}] {cat['name']:<30} : {cat['count']} phong cách")
+            print(f"   ↳ {cat['blurb']}")
+        print("\n💡 Gợi ý lệnh tra cứu:")
+        print("   python studio.py styles -c H             (Xem chi tiết nhóm Hook)")
+        print("   python studio.py styles -s \"apple\"       (Tìm phong cách kiểu Apple)")
+        print("   python studio.py styles -m \"H1,C1,L1,X5\"  (Tạo yêu cầu dựng video)")
+        print("   python studio.py styles -p               (Xem các bộ phối gợi ý)")
+        print("=" * 65 + "\n")
         return
 
     if args.command == "director":

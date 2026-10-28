@@ -33,6 +33,7 @@ DEFAULT_BRAND_KIT = {
         "outro_cta": "Cùng kiên trì mỗi ngày nhé. Follow để giỏi lên cùng mình!"
     },
     "style_pack": "Editorial Luxe",
+    "style_codes": ["H1", "C1", "L1", "X5", "M1", "G1"],
     "fonts": {
         "headline": "Playfair Display",
         "caption": "Be Vietnam Pro",
@@ -114,6 +115,10 @@ class BrandEngine:
             if style_m and "{{" not in style_m.group(1):
                 self.brand["style_pack"] = style_m.group(1).strip()
 
+            style_codes_m = re.search(r"-\s+\*\*Mã phong cách dựng video[^*]*:\*\*\s*(.+)", content)
+            if style_codes_m and "{{" not in style_codes_m.group(1):
+                self.brand["style_codes"] = [c.strip().upper() for c in style_codes_m.group(1).split(",") if c.strip()]
+
             head_font_m = re.search(r"-\s+\*\*Font tiêu đề chính[^*]*:\*\*\s*(.+)", content)
             if head_font_m and "{{" not in head_font_m.group(1):
                 self.brand["fonts"]["headline"] = head_font_m.group(1).strip()
@@ -160,6 +165,9 @@ class BrandEngine:
             print(f"[BrandEngine] Warning: Không thể đọc hoàn chỉnh {path}: {e}")
 
         return self.brand
+
+    def get_style_codes(self) -> List[str]:
+        return self.brand.get("style_codes", ["H1", "C1", "L1", "X5", "M1", "G1"])
 
     def get_fonts(self) -> Dict[str, str]:
         return self.brand["fonts"]

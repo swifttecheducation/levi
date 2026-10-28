@@ -12,6 +12,7 @@
 | :--- | :--- | :--- |
 | **"cài đặt cho mình"** / **"onboarding"** | `python studio.py onboard` | Chạy quy trình hướng dẫn 4 bước thiết lập ban đầu và Brand Kit. |
 | **"thiết lập thương hiệu"** / **"brand"** | `python studio.py brand` | Phỏng vấn chuyên sâu 7 trụ cột ADN thương hiệu và bảng sửa lỗi phiên âm. |
+| **"thư viện phong cách"** / **"styles"** | `python studio.py styles` | Tra cứu 105 phong cách dựng video, phối mã phong cách và bộ phối mẫu. |
 | **"chế độ đạo diễn"** / **"director"** | `python studio.py director` | Luồng khoa học hỏi ý kiến bạn từng bước (Màu sắc, J-Cut, SFX, Export). |
 | **"dựng video"** / **"autopilot"** / **"tự dựng đi"** | `python studio.py autopilot` | Quét video thô trong `inbox/`, tự động cắt dead-air, cân bằng âm thanh EBU R128 (-14 LUFS), khóa cằm né mặt bằng YuNet, xuất song song CapCut Desktop và Adobe Premiere/AE. |
 | **"xuất premiere"** | `python studio.py premiere -v <video>` | Tạo file Timeline FCPXML / Premiere XML chuẩn mở trực tiếp trong Adobe Premiere Pro với đầy đủ track video, B-roll và audio riêng biệt. |

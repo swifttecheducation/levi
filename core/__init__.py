@@ -8,6 +8,7 @@ from .color_grade import ColorGradeEngine
 from .pacing_engine import PacingEngine
 from .motion_reframer import MotionReframer
 from .semantic_sound_visual import SemanticSoundVisual
+from .styles_library import StylesLibrary, CURATED_PRESETS
 
 __all__ = [
     "BrandEngine",
@@ -18,5 +19,7 @@ __all__ = [
     "ColorGradeEngine",
     "PacingEngine",
     "MotionReframer",
-    "SemanticSoundVisual"
+    "SemanticSoundVisual",
+    "StylesLibrary",
+    "CURATED_PRESETS"
 ]

@@ -93,16 +93,25 @@ class BrandWizard:
             head_font = "Inter"
             accent_font = "Space Grotesk"
             p_color, s_color = "#FFFFFF", "#121212"
+            default_codes = "H10, C8, L4, V15, X6, M1, S1, G4"
         elif style_choice == "3":
             style_name = "Gen Z Pop"
             head_font = "Poppins"
             accent_font = "Caveat"
             p_color, s_color = "#FFE600", "#1E1E24"
+            default_codes = "H8, C2, L3, V7, X14, M1, S1, G3"
         else:
             style_name = "Editorial Luxe"
             head_font = "Playfair Display"
             accent_font = "Caveat"
             p_color, s_color = "#F2EDE4", "#212C1B"
+            default_codes = "H4, C7, L1, X16, M4, S1, G6"
+
+        style_codes_input = self._ask(
+            "Mã phong cách từ Thư viện 105 phong cách (ngăn cách bằng dấu phẩy)",
+            default=default_codes
+        )
+        selected_codes = [c.strip().upper() for c in style_codes_input.split(",") if c.strip()]
 
         # TRỤ CỘT 6: SẢN PHẨM & PHỄU QUÀ TẶNG (MANYCHAT AUTOMATION)
         print("\n📌 [TRỤ CỘT 6/7] SẢN PHẨM & PHỄU QUÀ TẶNG TỰ ĐỘNG (MANYCHAT)")
@@ -151,6 +160,7 @@ Tệp này là **Trụ Sở Thương Hiệu (Brand Homebase)** toàn diện củ
 
 ## 5. Phong cách thị giác & Font chữ (Visual & Typography)
 - **Bộ phong cách đang sử dụng:** {style_name}
+- **Mã phong cách dựng video:** {', '.join(selected_codes)}
 - **Font tiêu đề chính (Headline font):** {head_font}
 - **Font phụ đề (Caption font):** Be Vietnam Pro
 - **Font tạo điểm nhấn (Accent font):** {accent_font}

@@ -25,7 +25,10 @@ python studio.py onboard
 # 3. Phỏng vấn chuyên sâu 7 Trụ Cột Brand Kit
 python studio.py brand
 
-# 4. Kích hoạt chế độ Đạo diễn tương tác 5 bước
+# 4. Tra cứu Thư viện 105 phong cách dựng video (siatruong.com)
+python studio.py styles -p
+
+# 5. Kích hoạt chế độ Đạo diễn tương tác 5 bước
 python studio.py director
 
 # 5. Kích hoạt dựng tự động toàn diện
