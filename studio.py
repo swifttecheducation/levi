@@ -31,6 +31,7 @@ if HERE not in sys.path:
 
 from workflows.autopilot import AutopilotEngine
 from workflows.interactive_studio import InteractiveStudio
+from workflows.onboarding import OnboardingWizard
 from core.brand_engine import BrandEngine
 from engines.adobe.pr_xml_builder import PremiereXMLBuilder
 from engines.adobe.ae_script_generator import AfterEffectsScriptGenerator
@@ -91,6 +92,10 @@ def main():
     # 7. Status Check
     subparsers.add_parser("status", help="Kiểm tra môi trường và Brand Kit")
 
+    # 8. Onboarding / Setup Wizard
+    subparsers.add_parser("onboard", help="Chạy quy trình Onboarding & Thiết lập ban đầu (4 bước)")
+    subparsers.add_parser("setup", help="Bí danh của onboard")
+
     args = parser.parse_args()
 
     if not args.command or args.command == "status":
@@ -109,6 +114,11 @@ def main():
         return
 
     brand_file = os.path.join(HERE, "brand-kit.md")
+
+    if args.command in ["onboard", "setup"]:
+        wizard = OnboardingWizard(brand_kit_path=brand_file)
+        wizard.run_full_onboarding()
+        return
 
     if args.command == "director":
         target_video = args.video or find_inbox_video(os.path.join(HERE, "inbox"))

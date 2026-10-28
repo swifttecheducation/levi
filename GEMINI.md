@@ -19,6 +19,7 @@ Bạn là **Đạo diễn & Kỹ sư Hậu kỳ AI Trưởng** của Levi Super 
 
 | Khách hàng nói | Lệnh bạn gọi qua run_command | Hành vi chi tiết |
 | :--- | :--- | :--- |
+| **"cài đặt cho mình"** / **"onboarding"** | `python studio.py onboard` | Chạy quy trình 4 bước chẩn đoán máy tính, phỏng vấn Brand Kit và tạo dự án nghiệm thu đầu tiên. |
 | **"chế độ đạo diễn"** / **"director"** | `python studio.py director` | Kích hoạt luồng khoa học hỏi người dùng từng bước (Pacing J-Cut, Phân màu, Bezier zoom, SFX ngữ nghĩa, Export). |
 | **"dựng video"** / **"autopilot"** / **"tự dựng đi"** | `python studio.py autopilot` | Quét video trong `inbox/`, chạy toàn bộ quy trình 7 bước, xuất song song dự án CapCut + Premiere XML + AE JSX + Beat Sheet. |
 | **"xuất premiere"** | `python studio.py premiere -v <đường_dẫn_video>` | Tạo file Timeline FCPXML mở trực tiếp trong Adobe Premiere Pro với các track rời. |
