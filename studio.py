@@ -2,12 +2,13 @@
 # -*- coding: utf-8 -*-
 """
 studio.py — CLI ĐIỀU HÀNH TRUNG TÂM (LEVI SUPER STUDIO MASTER CLI v4.0).
-Quản lý toàn bộ cỗ máy dựng phim đa kênh tự động:
-  - Autopilot: Dựng 1-chạm từ video thô trong inbox/
-  - Adobe Pro Lane: Xuất Premiere Pro XML & After Effects JSX
-  - CapCut Lane: Xuất dự án CapCut Desktop đa track
-  - Storyboard: Xuất ảnh Beat Sheet duyệt trước
-  - Carousel & Story Kit: Sinh bài đăng Instagram 4:5 và Story 9:16
+Quản lý toàn bộ cỗ máy dựng phim đa kênh tự động và tương tác:
+  - director: Chế độ Đạo Diễn Khoa Học Từng Bước (Hỏi người dùng từng tính năng)
+  - autopilot: Dựng 1-chạm tự động từ video thô trong inbox/
+  - premiere: Xuất Premiere Pro XML Timeline
+  - ae: Xuất kịch bản After Effects JSX
+  - beat-sheet: Xuất Storyboard Beat Sheet duyệt nhanh
+  - carousel: Sinh bộ bài đăng Instagram Carousel
 """
 
 import os
@@ -29,6 +30,7 @@ if HERE not in sys.path:
     sys.path.insert(0, HERE)
 
 from workflows.autopilot import AutopilotEngine
+from workflows.interactive_studio import InteractiveStudio
 from core.brand_engine import BrandEngine
 from engines.adobe.pr_xml_builder import PremiereXMLBuilder
 from engines.adobe.ae_script_generator import AfterEffectsScriptGenerator
@@ -54,32 +56,39 @@ def main():
     )
     subparsers = parser.add_subparsers(dest="command", help="Lệnh thực thi")
 
-    # 1. Autopilot Command
-    ap_parser = subparsers.add_parser("autopilot", help="Chạy cỗ máy dựng 1-chạm từ A-Z")
+    # 1. Interactive Director Mode (HỎI TỪNG BƯỚC)
+    dir_parser = subparsers.add_parser("director", help="Chế độ Đạo Diễn Khoa Học (Hỏi ý kiến bạn tại từng bước)")
+    dir_parser.add_argument("--video", "-v", type=str, default=None, help="Đường dẫn file video thô (hoặc tự quét inbox/)")
+    dir_parser.add_argument("--name", "-n", type=str, default="Levi_Director_Project", help="Tên dự án")
+    dir_parser.add_argument("--headline", "-H", type=str, default=None, help="Tiêu đề câu Hook chính")
+    dir_parser.add_argument("--auto", action="store_true", help="Chạy tự động các lựa chọn khuyến nghị không cần hỏi")
+
+    # 2. Autopilot Mode (TỰ ĐỘNG 1-CHẠM)
+    ap_parser = subparsers.add_parser("autopilot", help="Chạy cỗ máy dựng 1-chạm tự động hoàn toàn từ A-Z")
     ap_parser.add_argument("--video", "-v", type=str, default=None, help="Đường dẫn file video thô (hoặc tự quét inbox/)")
     ap_parser.add_argument("--name", "-n", type=str, default="Levi_Project", help="Tên dự án")
     ap_parser.add_argument("--headline", "-H", type=str, default=None, help="Tiêu đề câu Hook chính")
     ap_parser.add_argument("--subtitles", "-s", type=str, default=None, help="File transcript JSON (nếu có sẵn)")
 
-    # 2. Premiere Pro XML Command
+    # 3. Premiere Pro XML Command
     pr_parser = subparsers.add_parser("premiere", help="Chỉ xuất Timeline chuẩn cho Adobe Premiere Pro (.xml)")
     pr_parser.add_argument("--video", "-v", type=str, required=True, help="Đường dẫn file video")
     pr_parser.add_argument("--name", "-n", type=str, default="Premiere_Sequence", help="Tên sequence")
 
-    # 3. After Effects JSX Command
+    # 4. After Effects JSX Command
     ae_parser = subparsers.add_parser("ae", help="Chỉ xuất ExtendScript JSX cho After Effects")
     ae_parser.add_argument("--text", "-t", type=str, required=True, help="Câu Hook headline")
     ae_parser.add_argument("--name", "-n", type=str, default="AE_Comp", help="Tên composition")
 
-    # 4. Beat Sheet Command
+    # 5. Beat Sheet Command
     bs_parser = subparsers.add_parser("beat-sheet", help="Xuất bảng ảnh Storyboard duyệt nhanh trước khi render")
     bs_parser.add_argument("--video", "-v", type=str, required=True, help="Đường dẫn video")
 
-    # 5. Carousel Command
+    # 6. Carousel Command
     car_parser = subparsers.add_parser("carousel", help="Sinh bộ bài đăng vuốt ngang Instagram Carousel")
     car_parser.add_argument("--headline", "-H", type=str, default="Insight Mới", help="Tiêu đề slide 1")
 
-    # 6. Status Check
+    # 7. Status Check
     subparsers.add_parser("status", help="Kiểm tra môi trường và Brand Kit")
 
     args = parser.parse_args()
@@ -101,7 +110,22 @@ def main():
 
     brand_file = os.path.join(HERE, "brand-kit.md")
 
-    if args.command == "autopilot":
+    if args.command == "director":
+        target_video = args.video or find_inbox_video(os.path.join(HERE, "inbox"))
+        if not target_video:
+            print("❌ Lỗi: Không tìm thấy video trong inbox/ và bạn chưa chỉ định --video!")
+            print("👉 Hãy thả video vào thư mục 'inbox/' hoặc chạy:")
+            print("   python studio.py director --video duong/dan/video.mp4")
+            sys.exit(1)
+
+        studio = InteractiveStudio(brand_kit_path=brand_file, auto_mode=args.auto)
+        studio.run_scientific_pipeline(
+            video_path=target_video,
+            project_name=args.name,
+            headline=args.headline
+        )
+
+    elif args.command == "autopilot":
         target_video = args.video or find_inbox_video(os.path.join(HERE, "inbox"))
         if not target_video:
             print("❌ Lỗi: Không tìm thấy video trong inbox/ và bạn chưa chỉ định --video!")

@@ -2,9 +2,11 @@
 from .beat_sheet import BeatSheetGenerator
 from .trial_reels import TrialReelsGenerator
 from .autopilot import AutopilotEngine
+from .interactive_studio import InteractiveStudio
 
 __all__ = [
     "BeatSheetGenerator",
     "TrialReelsGenerator",
-    "AutopilotEngine"
+    "AutopilotEngine",
+    "InteractiveStudio"
 ]

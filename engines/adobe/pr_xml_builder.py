@@ -78,8 +78,10 @@ class PremiereXMLBuilder:
         timeline_cursor_frames = 0
 
         for c_idx, c in enumerate(cuts):
-            in_frame = int(c["source_in"] * self.timebase)
-            out_frame = int(c["source_out"] * self.timebase)
+            src_in = c.get("source_in", c.get("video_in", 0.0))
+            src_out = c.get("source_out", c.get("video_out", src_in + c.get("duration", 1.0)))
+            in_frame = int(src_in * self.timebase)
+            out_frame = int(src_out * self.timebase)
             duration_frames = max(1, out_frame - in_frame)
 
             clipitem = ET.SubElement(track1, "clipitem", id=f"clipitem-{c_idx + 1}")
@@ -131,8 +133,10 @@ class PremiereXMLBuilder:
         a_track1 = ET.SubElement(audio, "track")
         a_cursor = 0
         for c_idx, c in enumerate(cuts):
-            in_frame = int(c["source_in"] * self.timebase)
-            out_frame = int(c["source_out"] * self.timebase)
+            aud_in = c.get("audio_in", c.get("source_in", 0.0))
+            aud_out = c.get("audio_out", c.get("source_out", aud_in + c.get("duration", 1.0)))
+            in_frame = int(aud_in * self.timebase)
+            out_frame = int(aud_out * self.timebase)
             dur = max(1, out_frame - in_frame)
 
             a_item = ET.SubElement(a_track1, "clipitem", id=f"a-clipitem-{c_idx + 1}")

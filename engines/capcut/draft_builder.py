@@ -152,9 +152,8 @@ class CapCutDraftBuilder:
             try:
                 from save_draft_impl import save_draft_impl
                 save_draft_impl(
-                    draft_folder=str(self.drafts_root).replace("\\", "/"),
                     draft_id=self.draft_id,
-                    project_name=self.project_name
+                    draft_folder=str(self.drafts_root).replace("\\", "/")
                 )
             except Exception as e:
                 print(f"[CapCutBuilder] Finalize note: {e}")

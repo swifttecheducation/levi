@@ -38,6 +38,7 @@ Mọi quy trình và tính năng đều có tài liệu hướng dẫn chuyên s
 
 | Tài Liệu Hướng Dẫn | Nội Dung Chi Tiết |
 | :--- | :--- |
+| 🎬 **[Luồng Đạo Diễn Tương Tác 5 Bước](docs/FLOW_DIRECTOR_INTERACTIVE.md)** | Luồng khoa học hỏi ý kiến người dùng tại từng step (Color, J-Cut, Motion, SFX, Export) |
 | 📖 **[Cẩm Nang Sử Dụng](docs/HUONG_DAN_SU_DUNG.md)** | Hướng dẫn cài đặt, thiết lập môi trường và dựng video từ A-Z |
 | ⚡ **[Luồng Dựng 1-Chạm (Autopilot)](docs/FLOW_AUTOPILOT.md)** | Chi tiết quy trình 7 bước tự động từ video thô đến thành phẩm |
 | 🎞️ **[Luồng Adobe Pro Studio](docs/FLOW_ADOBE_PRO.md)** | Hướng dẫn xuất Premiere Pro XML, After Effects JSX và aerender |
@@ -73,7 +74,8 @@ python studio.py autopilot
 
 | Khẩu Lệnh Bạn Nói | Lệnh CLI Tương Ứng | Tác Vụ Của Hệ Thống |
 | :--- | :--- | :--- |
-| **"dựng video"** / **"autopilot"** | `python studio.py autopilot` | Dựng tự động toàn diện từ A-Z cho video trong `inbox/` |
+| **"chế độ đạo diễn"** / **"director"** | `python studio.py director` | Luồng khoa học hỏi ý kiến bạn từng bước (Màu sắc, J-Cut, SFX, Export) |
+| **"dựng video"** / **"autopilot"** | `python studio.py autopilot` | Dựng tự động toàn diện 1-chạm từ A-Z cho video trong `inbox/` |
 | **"xuất premiere"** | `python studio.py premiere -v <video>` | Xuất Timeline FCPXML mở trực tiếp trong Adobe Premiere Pro |
 | **"xuất after effects"** | `python studio.py ae -t "<câu_hook>"` | Xuất kịch bản After Effects ExtendScript JSX nảy lò xo |
 | **"cho xem beat sheet"** | `python studio.py beat-sheet -v <video>` | Xuất ảnh Storyboard đánh số phân cảnh để duyệt trước |
