@@ -1,0 +1,18 @@
+# Cursor Rules — Levi Super Studio v4.0
+
+- Language: Always communicate in Vietnamese with the user.
+- Project Architecture:
+  - CLI Entrypoint: `studio.py`
+  - Core Modules: `core/` (brand_engine, whisper_transcriber, audio_master, chin_lock, rough_cutter)
+  - Timeline Exporters: `engines/adobe/` (pr_xml_builder, ae_script_generator), `engines/capcut/` (draft_builder), `engines/remotion/`
+  - Workflows: `workflows/` (autopilot, beat_sheet, trial_reels, carousel_story)
+- Execution:
+  - When user requests video editing: run `python studio.py autopilot`
+  - When user wants Premiere export: run `python studio.py premiere -v <path>`
+  - When user wants After Effects: run `python studio.py ae -t "<headline>"`
+  - When user wants Carousel: run `python studio.py carousel -H "<headline>"`
+- Standards:
+  - Loudness: EBU R128 (-14.0 LUFS)
+  - Video Aspect Ratio: 9:16 (1080x1920)
+  - Carousel Ratio: 4:5 (1080x1350)
+  - Fonts: Always use Vietnamese verified fonts from `assets/fonts/` (Playfair Display, Be Vietnam Pro, Caveat, Inter, Poppins).
