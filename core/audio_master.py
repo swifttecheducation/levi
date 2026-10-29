@@ -8,26 +8,23 @@ Tính toán tham số FFmpeg filter loudnorm, compand, anlmdn và tự động h
 import os
 import subprocess
 import json
-from typing import Dict, Any, Optional, Tuple
+from typing import List, Dict, Any, Optional, Tuple
 
 
 class AudioMaster:
     def __init__(
         self,
-        target_i: float = -14.0,     # Integrated Loudness (-14 LUFS)
+        target_i: float = -14.0,     # Integrated Loudness (-14 LUFS cho Reels/TikTok)
         target_tp: float = -1.5,     # Maximum True Peak (-1.5 dBTP)
-        target_lra: float = 7.0       # Loudness Range (7 LU)
+        target_lra: float = 11.0     # Loudness Range (11 LU)
     ):
         self.target_i = target_i
         self.target_tp = target_tp
         self.target_lra = target_lra
 
     def get_loudnorm_filter_string(self) -> str:
-        """Trả về chuỗi cấu hình bộ lọc loudnorm của FFmpeg theo chuẩn EBU R128."""
-        return (
-            f"loudnorm=I={self.target_i}:TP={self.target_tp}:LRA={self.target_lra}:"
-            f"measured_I=-20.0:measured_TP=-2.0:measured_LRA=6.0:measured_thresh=-30.0:linear=true"
-        )
+        """Trả về chuỗi cấu hình bộ lọc loudnorm của FFmpeg theo chuẩn phát sóng EBU R128 (-14 LUFS)."""
+        return f"loudnorm=I={self.target_i}:TP={self.target_tp}:LRA={self.target_lra}"
 
     def build_ffmpeg_audio_master_command(
         self,
