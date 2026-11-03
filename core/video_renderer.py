@@ -135,10 +135,12 @@ class VideoRenderer:
         cuts: Optional[List[Dict[str, Any]]] = None,
         apply_color_grade: bool = True,
         apply_audio_master: bool = True,
-        bgm_path: Optional[str] = None
+        bgm_path: Optional[str] = None,
+        ass_subtitle_path: Optional[str] = None
     ) -> bool:
         """
         Thực thi toàn bộ luồng Render xuất bản video thành phẩm:
+        (Nếu truyền `ass_subtitle_path`, phụ đề .ass — mốc thời gian theo TIMELINE ĐÃ CẮT — được đốt thẳng vào hình.)
         Cắt gọt dead-air + Ghép liền mạch + Phân màu điện ảnh + Âm thanh chuẩn EBU R128.
         """
         if not os.path.exists(video_path):
@@ -165,6 +167,14 @@ class VideoRenderer:
             look_cfg = CINEMATIC_LOOKS[self.color_engine.current_look]
             v_filters.append(look_cfg["ffmpeg_filter"])
             print(f"  🎨 Áp dụng màu điện ảnh: {look_cfg['name']}")
+
+        # Đốt phụ đề ASS (sau màu, trước khi chuẩn hoá pixel format) để chữ không bị đổi màu.
+        if ass_subtitle_path:
+            if not os.path.exists(ass_subtitle_path):
+                raise FileNotFoundError(f"Không tìm thấy file phụ đề: {ass_subtitle_path}")
+            ass_abs = os.path.abspath(ass_subtitle_path).replace("\\", "/").replace(":", "\\:")
+            v_filters.append(f"ass='{ass_abs}'")
+            print(f"  💬 Đốt phụ đề: {os.path.basename(ass_subtitle_path)}")
 
         # Luôn chuẩn hoá pixel format về yuv420p & TV Range tương thích 100% với Windows Media Player & Mobile
         v_filters.append("scale=out_color_matrix=bt709:out_range=limited,format=yuv420p")
