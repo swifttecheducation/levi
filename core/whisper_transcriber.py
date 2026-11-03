@@ -90,7 +90,7 @@ class WhisperTranscriber:
 
         try:
             res = subprocess.run(
-                ["ffmpeg", "-hide_banner", "-i", video_path,
+                ["ffmpeg", "-hide_banner", "-vn", "-i", video_path,   # -vn: chỉ cần âm thanh, khỏi giải mã hình
                  "-af", f"silencedetect=noise={noise_db}dB:d={min_silence}", "-f", "null", "-"],
                 stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=max(120, int(total * 2))
             )
