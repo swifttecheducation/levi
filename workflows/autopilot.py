@@ -25,7 +25,7 @@ from core.rough_cutter import RoughCutter
 from core.audio_master import AudioMaster
 from engines.adobe.pr_xml_builder import PremiereXMLBuilder
 from engines.adobe.ae_script_generator import AfterEffectsScriptGenerator
-from engines.capcut.draft_builder import CapCutDraftBuilder
+from engines.capcut.draft_builder import CapCutDraftBuilder, CapCutUnavailable
 from workflows.beat_sheet import BeatSheetGenerator
 from workflows.trial_reels import TrialReelsGenerator
 from workflows.carousel_story.carousel import CarouselStoryGenerator
@@ -47,9 +47,13 @@ class AutopilotEngine:
         project_name: str = "Levi_Autopilot_Project",
         headline: Optional[str] = None,
         transcript_json_path: Optional[str] = None,
-        output_dir: str = "outbox"
+        output_dir: str = "outbox",
+        allow_mock: bool = False
     ) -> Dict[str, Any]:
-        """Thực thi toàn bộ quy trình Autopilot 1-chạm."""
+        """
+        Thực thi toàn bộ quy trình Autopilot 1-chạm.
+        allow_mock=True chỉ dành cho chạy thử: dùng transcript giả khi không đọc được âm thanh.
+        """
         print("=" * 65)
         print(f"🎬 KÍCH HOẠT AUTOPILOT OMNI-PIPELINE: {project_name}")
         print("=" * 65)
@@ -62,28 +66,35 @@ class AutopilotEngine:
         brand_fonts = self.brand_engine.get_fonts()
         hook_headline = headline or f"Bí Quyết Tạo Video Triệu View"
 
-        # 1. Bóc tách hoặc nạp transcript
+        # 1. Bóc tách hoặc nạp transcript (Whisper thật > khoảng lặng thật > chỉ khi allow_mock mới giả lập)
         print("\n[1/7] 📝 Đang phân tích giọng nói & nhịp chữ...")
-        if transcript_json_path and os.path.exists(transcript_json_path):
-            subtitles = self.transcriber.load_transcript_json(transcript_json_path)
-        else:
-            # Giả lập phân đoạn mẫu nếu chưa có Whisper chạy trên môi trường
-            subtitles = self.transcriber.create_mock_transcript_from_text(
-                "Đây là video được dựng tự động hoàn toàn bằng hệ thống Levi Super Studio v4.0",
-                total_duration=15.0
-            )
-        print(f"       -> Đã chuẩn hoá {len(subtitles)} phân đoạn phụ đề.")
+        speech = self.transcriber.load_or_transcribe(
+            video_path,
+            transcript_json_path=transcript_json_path,
+            allow_mock=allow_mock,
+            mock_text="Đây là video được dựng tự động hoàn toàn bằng hệ thống Levi Super Studio v4.0",
+            mock_duration=15.0
+        )
+        speech_segments = speech["segments"]
+        subtitles_src = speech["subtitles"]
+        mode_label = {"json": "file transcript", "whisper": "Whisper", "silence": "khoảng lặng thật (chưa có chữ)",
+                      "mock": "DỮ LIỆU GIẢ LẬP (chỉ để chạy thử)"}[speech["mode"]]
+        print(f"       -> Nguồn: {mode_label}. {len(speech_segments)} đoạn tiếng nói, {len(subtitles_src)} cụm phụ đề.")
 
         # 2. Cắt khoảng lặng & tính toán Micro-Zoom
         print("\n[2/7] ✂️  Đang cắt gọt khoảng lặng (Dead-Air) & tính Micro-Zoom...")
-        cuts = self.cutter.compute_cuts_from_speech_segments(subtitles)
+        cuts = self.cutter.compute_cuts_from_speech_segments(speech_segments)
+        cuts = self.cutter.clamp_cuts(cuts, self.transcriber.get_media_duration(video_path))
         final_duration = self.cutter.get_timeline_duration(cuts)
         print(f"       -> Tổng thời lượng sau khi gọt sạch: {final_duration:.2f}s ({len(cuts)} nhịp cuts).")
 
-        # 3. Quét cằm AI Chin-Lock
+        # 3. Quét cằm AI Chin-Lock, gắn vị trí an toàn cho từng phụ đề rồi đổi sang mốc timeline đã cắt
         print("\n[3/7] 🎯 Đang quét AI Chin-Lock (YuNet) để né mặt...")
         anchors = self.chin_lock.get_timeline_chin_anchors(video_path)
-        print(f"       -> Vị trí neo phụ đề an toàn: Y ~ {anchors[0]['sub_top_y']}px.")
+        print(f"       -> Vị trí neo phụ đề an toàn: Y ~ {anchors[0]['sub_top_y']}px ({len(anchors)} mốc quét).")
+        subtitles = self.cutter.remap_to_timeline(
+            self.chin_lock.attach_subtitle_positions(subtitles_src, anchors), cuts
+        )
 
         # 4. Xuất Beat Sheet Storyboard duyệt trước
         print("\n[4/7] 📋 Đang tạo Beat Sheet Storyboard...")
@@ -92,22 +103,26 @@ class AutopilotEngine:
         beat_gen.extract_and_generate_from_video(video_path, cuts, beat_sheet_path)
         print(f"       -> Đã xuất Beat Sheet: {beat_sheet_path}")
 
-        # 5. Xuất Làn 1: Dự án CapCut Desktop
+        # 5. Xuất Làn 1: Dự án CapCut Desktop (lỗi ở làn này không được làm hỏng các làn còn lại)
         print("\n[5/7] 📱 Đang tạo dự án CapCut Desktop Native...")
-        capcut_builder = CapCutDraftBuilder(project_name)
-        capcut_builder.add_main_video(video_path, duration_sec=final_duration)
-        capcut_builder.add_hook(
-            headline=hook_headline,
-            eyebrow="LEVI INSIGHT",
-            font_name=brand_fonts.get("headline", "Playfair Display"),
-            font_color=brand_colors.get("primary", "#F2EDE4")
-        )
-        capcut_builder.add_subtitles(
-            subtitles=subtitles,
-            font_name=brand_fonts.get("caption", "Be Vietnam Pro")
-        )
-        capcut_path = capcut_builder.finalize()
-        print(f"       -> Đã tạo dự án CapCut tại: {capcut_path}")
+        capcut_path = None
+        try:
+            capcut_builder = CapCutDraftBuilder(project_name)
+            capcut_builder.add_main_video(video_path, cuts=cuts)
+            capcut_builder.add_hook(
+                headline=hook_headline,
+                eyebrow="LEVI INSIGHT",
+                font_name=brand_fonts.get("headline", "Playfair Display"),
+                font_color=brand_colors.get("primary", "#F2EDE4")
+            )
+            capcut_builder.add_subtitles(
+                subtitles=subtitles,
+                font_name=brand_fonts.get("caption", "Be Vietnam Pro")
+            )
+            capcut_path = capcut_builder.finalize()
+            print(f"       -> Đã tạo dự án CapCut tại: {capcut_path}")
+        except (CapCutUnavailable, RuntimeError) as e:
+            print(f"       ⚠️ BỎ QUA làn CapCut: {e}")
 
         # 6. Xuất Làn 2: Adobe Premiere Pro XML & After Effects ExtendScript JSX
         print("\n[6/7] 🎞️  Đang tạo Timeline Adobe Premiere Pro XML & After Effects JSX...")

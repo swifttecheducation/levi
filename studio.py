@@ -44,32 +44,45 @@ from core.video_renderer import VideoRenderer
 from core.style_cloner import StyleClonerEngine, ReferenceVideoAnalyzer
 
 
+VIDEO_EXTS = {".mp4", ".mov", ".m4v", ".mkv"}
+SKIP_SUBFOLDERS = {"broll", "nhac_nen", "sfx", "logo_watermark"}
+
+
+def _videos_in(folder: str):
+    """Các file video trong một thư mục (không đệ quy), sắp xếp theo tên, không phân biệt hoa/thường đuôi file."""
+    try:
+        names = sorted(os.listdir(folder))
+    except OSError:
+        return []
+    return [
+        os.path.join(folder, n) for n in names
+        if os.path.isfile(os.path.join(folder, n)) and os.path.splitext(n)[1].lower() in VIDEO_EXTS
+    ]
+
+
 def find_inbox_video(inbox_dir: str = "inbox") -> Optional[str]:
     """
-    Tự động tìm file video đầu tiên trong thư mục inbox/:
-    Hỗ trợ cả thả trực tiếp vào inbox/ hoặc trong các thư mục con (vd: inbox/video_chinh/).
+    Tự động tìm file video đầu tiên (theo thứ tự tên) trong thư mục inbox/:
+    Hỗ trợ cả thả trực tiếp vào inbox/ hoặc trong các thư mục con cấp 1 (vd: inbox/video_chinh/).
     """
-    if not os.path.exists(inbox_dir):
+    if not os.path.isdir(inbox_dir):
         return None
-    patterns = ["*.mp4", "*.mov", "*.m4v", "*.mkv"]
-    # 1. Tìm trực tiếp ngay trong inbox/
-    for p in patterns:
-        files = glob.glob(os.path.join(inbox_dir, p))
-        if files:
-            return files[0]
 
-    # 2. Tìm trong các thư mục con cấp 1 (vd: inbox/video_chinh/, inbox/raw/)
-    for p in patterns:
-        sub_files = glob.glob(os.path.join(inbox_dir, "*", p))
-        for f in sub_files:
-            folder_name = os.path.basename(os.path.dirname(f)).lower()
-            # Bỏ qua thư mục broll hoặc nhạc
-            if folder_name not in ["broll", "nhac_nen", "sfx", "logo_watermark"]:
-                return f
+    direct = _videos_in(inbox_dir)
+    if direct:
+        return direct[0]
+
+    for sub in sorted(os.listdir(inbox_dir)):
+        sub_path = os.path.join(inbox_dir, sub)
+        # Bỏ qua thư mục broll hoặc nhạc
+        if os.path.isdir(sub_path) and sub.lower() not in SKIP_SUBFOLDERS:
+            files = _videos_in(sub_path)
+            if files:
+                return files[0]
     return None
 
 
-def main():
+def _run():
     parser = argparse.ArgumentParser(
         description="🎬 Levi Super Studio v4.0 — Master Video & Multi-Channel Automation Engine"
     )
@@ -82,6 +95,8 @@ def main():
     dir_parser.add_argument("--headline", "-H", type=str, default=None, help="Tiêu đề câu Hook chính")
     dir_parser.add_argument("--mix", "-m", type=str, default=None, help="Mã phong cách từ Thư viện 105 phong cách (vd: H1,C1,L1,X5)")
     dir_parser.add_argument("--auto", action="store_true", help="Chạy tự động các lựa chọn khuyến nghị không cần hỏi")
+    dir_parser.add_argument("--subtitles", "-s", type=str, default=None, help="File transcript JSON (nếu có sẵn)")
+    dir_parser.add_argument("--allow-mock", action="store_true", help="CHỈ ĐỂ CHẠY THỬ: dùng transcript giả nếu không đọc được âm thanh")
 
     # 2. Autopilot Mode (TỰ ĐỘNG 1-CHẠM)
     ap_parser = subparsers.add_parser("autopilot", help="Chạy cỗ máy dựng 1-chạm tự động hoàn toàn từ A-Z")
@@ -91,6 +106,7 @@ def main():
     ap_parser.add_argument("--subtitles", "-s", type=str, default=None, help="File transcript JSON (nếu có sẵn)")
     ap_parser.add_argument("--mix", "-m", type=str, default=None, help="Mã phong cách từ Thư viện 105 phong cách (vd: H1,C1,L1,X5)")
     ap_parser.add_argument("--render", "-r", action="store_true", help="Render trực tiếp video thành phẩm MP4 vào outbox/video_hoan_thien/")
+    ap_parser.add_argument("--allow-mock", action="store_true", help="CHỈ ĐỂ CHẠY THỬ: dùng transcript giả nếu không đọc được âm thanh")
 
     # 3. Direct Render Command
     rend_parser = subparsers.add_parser("render", help="Render video hoàn thiện MP4 trực tiếp bằng GPU/CPU")
@@ -146,6 +162,7 @@ def main():
     clone_p.add_argument("--video", "-v", type=str, default=None, help="Đường dẫn video thô cần dựng (hoặc quét inbox/)")
     clone_p.add_argument("--name", "-n", type=str, default="Cloned_Project", help="Tên dự án")
     clone_p.add_argument("--render", action="store_true", help="Render trực tiếp video thành phẩm MP4")
+    clone_p.add_argument("--allow-mock", action="store_true", help="CHỈ ĐỂ CHẠY THỬ: dùng transcript giả nếu không đọc được âm thanh")
 
     # 13. Analyze Reference Only Command
     ana_p = subparsers.add_parser("analyze", help="Phân tích dấu vân tay biên tập của video tham chiếu")
@@ -300,7 +317,8 @@ def main():
         ap = AutopilotEngine(brand_kit_path=brand_file)
         ap_res = ap.run_autopilot(
             video_path=target_video,
-            project_name=args.name
+            project_name=args.name,
+            allow_mock=args.allow_mock
         )
 
         if getattr(args, "render", False):
@@ -329,7 +347,9 @@ def main():
         studio.run_scientific_pipeline(
             video_path=target_video,
             project_name=args.name,
-            headline=args.headline
+            headline=args.headline,
+            transcript_json_path=args.subtitles,
+            allow_mock=args.allow_mock
         )
 
     elif args.command == "autopilot":
@@ -345,7 +365,8 @@ def main():
             video_path=target_video,
             project_name=args.name,
             headline=args.headline,
-            transcript_json_path=args.subtitles
+            transcript_json_path=args.subtitles,
+            allow_mock=args.allow_mock
         )
 
         if getattr(args, "render", False):
@@ -421,6 +442,15 @@ def main():
             output_dir=os.path.join(HERE, "outbox", "carousel")
         )
         print(f"✅ Đã xuất {len(slides)} slides Carousel tại: outbox/carousel/")
+
+
+def main():
+    """Điểm vào CLI: lỗi dự kiến (thiếu file, thiếu ffmpeg, lỗi engine) in thông báo ngắn gọn thay vì traceback."""
+    try:
+        _run()
+    except (FileNotFoundError, RuntimeError) as e:
+        print(f"\n❌ Lỗi: {e}")
+        sys.exit(1)
 
 
 if __name__ == "__main__":

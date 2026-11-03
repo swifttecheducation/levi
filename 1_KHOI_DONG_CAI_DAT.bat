@@ -17,7 +17,7 @@ if %errorlevel% neq 0 (
 )
 
 echo [2/3] Đang cài đặt / đồng bộ các thư viện cần thiết...
-pip install -r requirements.txt --quiet
+python -m pip install -r requirements.txt --quiet
 if %errorlevel% neq 0 (
     echo ⚠️ Có cảnh báo khi cài thư viện. Đang tiếp tục chạy...
 )

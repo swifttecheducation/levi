@@ -72,8 +72,11 @@ class ChinLock:
             
             # Cằm xấp xỉ ở đáy của bounding box khuôn mặt
             chin_y = fy + fh
-            scale_y = AUTH_HEIGHT / float(h)
-            chin_y_auth = chin_y * scale_y
+            # Quy đổi sang canvas 1080x1920 theo kiểu "fit" (video ngang sẽ có viền trên/dưới),
+            # thay vì giả định khung hình luôn lấp đầy chiều cao canvas.
+            fit = min(AUTH_WIDTH / float(w), AUTH_HEIGHT / float(h))
+            offset_y = (AUTH_HEIGHT - h * fit) / 2.0
+            chin_y_auth = offset_y + chin_y * fit
 
             # Landmark mắt để tính góc xoay (Head Roll Angle)
             # best_face[4:14] chứa 5 điểm landmarks (mắt phải, mắt trái, mũi, mép miệng phải, mép miệng trái)
@@ -91,6 +94,43 @@ class ChinLock:
             }
         except Exception:
             return None
+
+    @staticmethod
+    def px_to_capcut_transform_y(y_px: float, canvas_h: int = AUTH_HEIGHT, lowest: float = -0.9) -> float:
+        """
+        Đổi tọa độ Y (px, gốc ở đỉnh canvas) sang transform_y của CapCut (0 = giữa, +1 = đỉnh, -1 = đáy).
+        Y=1320px -> khoảng -0.375, khớp giá trị mặc định -0.36 mà builder đang dùng.
+        """
+        ty = 1.0 - 2.0 * float(y_px) / float(canvas_h)
+        return round(max(lowest, min(1.0, ty)), 3)
+
+    @staticmethod
+    def anchor_y_at(anchors: List[Dict[str, Any]], t_sec: float) -> float:
+        """Lấy sub_top_y của mốc neo gần nhất không muộn hơn t_sec (mốc đầu tiên nếu t_sec nằm trước tất cả)."""
+        chosen = anchors[0]
+        for a in anchors:
+            if a["timestamp"] <= t_sec:
+                chosen = a
+            else:
+                break
+        return chosen["sub_top_y"]
+
+    def attach_subtitle_positions(
+        self,
+        subtitles: List[Dict[str, Any]],
+        anchors: List[Dict[str, Any]]
+    ) -> List[Dict[str, Any]]:
+        """
+        Gắn `transform_y` an toàn (né cằm) cho từng phụ đề. Dùng mốc thời gian GỐC của phụ đề,
+        vì anchors được quét theo video gốc — gọi hàm này TRƯỚC khi remap sang timeline đã cắt.
+        """
+        out = []
+        for s in subtitles:
+            new = dict(s)
+            y_px = self.anchor_y_at(anchors, s["start"])
+            new["transform_y"] = self.px_to_capcut_transform_y(y_px)
+            out.append(new)
+        return out
 
     def get_timeline_chin_anchors(
         self,

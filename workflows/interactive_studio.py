@@ -24,7 +24,7 @@ from core.motion_reframer import MotionReframer
 from core.semantic_sound_visual import SemanticSoundVisual
 from engines.adobe.pr_xml_builder import PremiereXMLBuilder
 from engines.adobe.ae_script_generator import AfterEffectsScriptGenerator
-from engines.capcut.draft_builder import CapCutDraftBuilder
+from engines.capcut.draft_builder import CapCutDraftBuilder, CapCutUnavailable
 from workflows.beat_sheet import BeatSheetGenerator
 from workflows.trial_reels import TrialReelsGenerator
 from workflows.carousel_story.carousel import CarouselStoryGenerator
@@ -63,9 +63,13 @@ class InteractiveStudio:
         project_name: str = "Levi_Scientific_Project",
         headline: Optional[str] = None,
         transcript_json_path: Optional[str] = None,
-        output_dir: str = "outbox"
+        output_dir: str = "outbox",
+        allow_mock: bool = False
     ) -> Dict[str, Any]:
-        """Điều phối 5 bước dựng phim khoa học có tương tác."""
+        """
+        Điều phối 5 bước dựng phim khoa học có tương tác.
+        allow_mock=True chỉ dành cho chạy thử: dùng transcript giả khi không đọc được âm thanh.
+        """
         print("\n" + "=" * 65)
         print("🎬  LEVI SUPER STUDIO v4.0 — LUỒNG DỰNG PHIM KHOA HỌC TỐI ƯU")
         print("=" * 65)
@@ -78,14 +82,20 @@ class InteractiveStudio:
         brand_fonts = self.brand_engine.get_fonts()
         hook_headline = headline or "Bí Quyết Tạo Video Triệu View Chuẩn Studio"
 
-        # Bóc tách giọng nói
-        if transcript_json_path and os.path.exists(transcript_json_path):
-            subtitles = self.transcriber.load_transcript_json(transcript_json_path)
-        else:
-            subtitles = self.transcriber.create_mock_transcript_from_text(
-                "Đây là video được dựng khoa học với nhịp cắt J-Cut, màu sắc điện ảnh và né cằm chuẩn xác.",
-                total_duration=16.0
-            )
+        # Bóc tách giọng nói (Whisper thật > khoảng lặng thật > chỉ khi allow_mock mới giả lập)
+        speech = self.transcriber.load_or_transcribe(
+            video_path,
+            transcript_json_path=transcript_json_path,
+            allow_mock=allow_mock,
+            mock_text="Đây là video được dựng khoa học với nhịp cắt J-Cut, màu sắc điện ảnh và né cằm chuẩn xác.",
+            mock_duration=16.0
+        )
+        speech_segments = speech["segments"]
+        subtitles = speech["subtitles"]
+        if speech["mode"] == "mock":
+            print("⚠️ Đang dùng DỮ LIỆU GIẢ LẬP (--allow-mock). Kết quả chỉ để chạy thử.")
+        elif speech["mode"] == "silence":
+            print("⚠️ Chưa có chữ: chỉ cắt theo khoảng lặng thật, không có phụ đề. Cài Whisper hoặc truyền transcript để có phụ đề.")
 
         pipeline_choices = {}
 
@@ -95,8 +105,8 @@ class InteractiveStudio:
         print("\n" + "-" * 65)
         print("📍 BƯỚC 1/5: TỐI ƯU NHỊP CẮT & KHOẢNG LẶNG (PACING & J-CUT)")
         print("-" * 65)
-        base_cuts = self.cutter.compute_cuts_from_speech_segments(subtitles)
-        print(f"📊 Dữ liệu: Phát hiện {len(subtitles)} phân đoạn câu nói.")
+        base_cuts = self.cutter.compute_cuts_from_speech_segments(speech_segments)
+        print(f"📊 Dữ liệu: Phát hiện {len(speech_segments)} phân đoạn câu nói.")
 
         ans_step1 = self._ask_user(
             "Bạn có muốn bật J-Cut (âm thanh cất lên trước 120ms) và giữ lại các khoảng lặng kịch tính (Dramatic Pause)? (y: Bật / n: Cắt thẳng / s: Bỏ qua)",
@@ -104,7 +114,7 @@ class InteractiveStudio:
         )
         if ans_step1 in ["y", "yes"]:
             optimized_cuts = self.pacing_engine.optimize_timeline_pacing(
-                subtitles, enable_j_cuts=True, preserve_dramatic_pauses=True
+                speech_segments, enable_j_cuts=True, preserve_dramatic_pauses=True
             )
             pipeline_choices["pacing"] = "j_cut_dramatic_pause"
             print("  ✅ Đã áp dụng J-Cut mềm mại và bảo toàn khoảng lặng cảm xúc.")
@@ -113,6 +123,7 @@ class InteractiveStudio:
             pipeline_choices["pacing"] = "standard_cuts"
             print("  ⏭️ Giữ nhịp cắt tiêu chuẩn.")
 
+        optimized_cuts = self.cutter.clamp_cuts(optimized_cuts, self.transcriber.get_media_duration(video_path))
         final_duration = sum(c["duration"] for c in optimized_cuts)
 
         # =====================================================================
@@ -206,6 +217,11 @@ class InteractiveStudio:
         ans_step5 = self._ask_user("Chọn nền tảng bạn muốn xuất [1/2/3]", default="3")
         exported_files = {}
 
+        # Gắn vị trí né cằm cho từng phụ đề rồi đổi sang mốc thời gian của timeline đã cắt
+        subtitles = self.cutter.remap_to_timeline(
+            self.chin_lock.attach_subtitle_positions(subtitles, anchors), optimized_cuts
+        )
+
         # 1. Beat Sheet luôn xuất để xem trước
         beat_gen = BeatSheetGenerator()
         beat_sheet_path = os.path.join(output_dir, f"{project_name}_beat_sheet.jpg")
@@ -214,21 +230,24 @@ class InteractiveStudio:
 
         # 2. Xuất CapCut nếu chọn 1 hoặc 3
         if ans_step5 in ["1", "3"]:
-            capcut_builder = CapCutDraftBuilder(project_name)
-            capcut_builder.add_main_video(video_path, duration_sec=final_duration)
-            capcut_builder.add_hook(
-                headline=hook_headline,
-                eyebrow="LEVI INSIGHT",
-                font_name=brand_fonts.get("headline", "Playfair Display"),
-                font_color=brand_colors.get("primary", "#F2EDE4")
-            )
-            capcut_builder.add_subtitles(
-                subtitles=subtitles,
-                font_name=brand_fonts.get("caption", "Be Vietnam Pro")
-            )
-            capcut_path = capcut_builder.finalize()
-            exported_files["capcut_draft"] = capcut_path
-            print(f"  ✅ Đã tạo dự án CapCut Desktop tại: {capcut_path}")
+            try:
+                capcut_builder = CapCutDraftBuilder(project_name)
+                capcut_builder.add_main_video(video_path, cuts=optimized_cuts)
+                capcut_builder.add_hook(
+                    headline=hook_headline,
+                    eyebrow="LEVI INSIGHT",
+                    font_name=brand_fonts.get("headline", "Playfair Display"),
+                    font_color=brand_colors.get("primary", "#F2EDE4")
+                )
+                capcut_builder.add_subtitles(
+                    subtitles=subtitles,
+                    font_name=brand_fonts.get("caption", "Be Vietnam Pro")
+                )
+                capcut_path = capcut_builder.finalize()
+                exported_files["capcut_draft"] = capcut_path
+                print(f"  ✅ Đã tạo dự án CapCut Desktop tại: {capcut_path}")
+            except (CapCutUnavailable, RuntimeError) as e:
+                print(f"  ⚠️ BỎ QUA làn CapCut: {e}")
 
         # 3. Xuất Adobe Premiere / After Effects nếu chọn 2 hoặc 3
         if ans_step5 in ["2", "3"]:

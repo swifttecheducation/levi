@@ -40,8 +40,10 @@ class ReferenceVideoAnalyzer:
             "-of", "json",
             video_path
         ]
+        if not os.path.exists(video_path):
+            raise FileNotFoundError(f"Không tìm thấy video mẫu: {video_path}")
         try:
-            res = subprocess.check_output(cmd, text=True)
+            res = subprocess.check_output(cmd, text=True, stderr=subprocess.PIPE, timeout=60)
             data = json.loads(res)
             stream = data.get("streams", [{}])[0]
             fmt = data.get("format", {})
@@ -56,10 +58,11 @@ class ReferenceVideoAnalyzer:
             else:
                 fps = float(fps_str)
             return {"width": width, "height": height, "duration": dur, "fps": fps}
-        except Exception:
-            return {"width": 1080, "height": 1920, "duration": 10.0, "fps": 30.0}
+        except Exception as e:
+            # Trước đây trả về 1080x1920/10s/30fps "mặc định" nên fingerprint trông như thật dù không đọc được gì.
+            raise RuntimeError(f"Không đọc được thông tin video mẫu bằng ffprobe (đã cài ffmpeg chưa?): {e}") from e
 
-    def detect_scene_cuts(self, video_path: str, threshold: float = 0.3) -> List[float]:
+    def detect_scene_cuts(self, video_path: str, threshold: float = 0.3, timeout: float = 120.0) -> List[float]:
         """
         Dùng bộ lọc `select='gt(scene,0.3)'` của FFmpeg để phát hiện các thời điểm chuyển cảnh chính xác.
         """
@@ -69,7 +72,9 @@ class ReferenceVideoAnalyzer:
             "-f", "null", "-"
         ]
         try:
-            res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=30)
+            res = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, timeout=timeout)
+            if res.returncode != 0:
+                raise RuntimeError(f"ffmpeg thoát với mã {res.returncode}: {res.stderr[-300:]}")
             pts_times = []
             for line in res.stdout.splitlines() + res.stderr.splitlines():
                 if "pts_time:" in line:
@@ -79,9 +84,10 @@ class ReferenceVideoAnalyzer:
                         if not pts_times or (val - pts_times[-1]) > 0.2:
                             pts_times.append(val)
             return sorted(pts_times)
-        except Exception:
-            # Fallback mô phỏng nếu file video test hoặc lệnh timeout
-            return [0.0, 1.2, 2.5, 4.8, 7.0]
+        except Exception as e:
+            # Trước đây trả về các mốc cắt GIẢ [0.0, 1.2, 2.5, 4.8, 7.0] khi timeout/lỗi, khiến "dấu vân tay"
+            # biên tập được bịa ra mà không báo gì. Giờ báo lỗi rõ ràng.
+            raise RuntimeError(f"Không phát hiện được điểm chuyển cảnh của video mẫu: {e}") from e
 
     def extract_editing_fingerprint(self, video_path: str) -> Dict[str, Any]:
         """
@@ -93,7 +99,7 @@ class ReferenceVideoAnalyzer:
         """
         meta = self.get_video_info(video_path)
         total_dur = max(meta["duration"], 1.0)
-        cuts = self.detect_scene_cuts(video_path)
+        cuts = self.detect_scene_cuts(video_path, timeout=max(120.0, total_dur * 3))
 
         cut_count = len(cuts)
         cuts_per_sec = cut_count / total_dur

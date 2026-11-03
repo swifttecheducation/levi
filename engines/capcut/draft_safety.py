@@ -26,7 +26,8 @@ Never auto-delete. When rolling_delete_candidates is non-empty, ASK the creator 
 """
 import os, re, json, sys, time, hashlib, shutil, glob, subprocess
 
-CAP = (os.path.join(os.environ["LOCALAPPDATA"], "CapCut/User Data/Projects/com.lveditor.draft").replace("\\", "/")
+CAP = (os.path.join(os.environ.get("LOCALAPPDATA") or os.path.expanduser("~/AppData/Local"),
+                    "CapCut/User Data/Projects/com.lveditor.draft").replace("\\", "/")
        if os.name == "nt" else
        os.path.expanduser("~/Movies/CapCut/User Data/Projects/com.lveditor.draft"))
 KEEP_VERSIONS = 3

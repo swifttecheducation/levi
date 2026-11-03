@@ -73,6 +73,12 @@ Thả video thô mới quay vào thư mục `inbox/` và chạy:
 python studio.py autopilot
 ```
 
+> **Phụ đề & cắt khoảng lặng:** hệ thống cắt theo giọng nói **thật** trong video.
+> - Muốn có phụ đề tự động: cài một engine Whisper (`pip install faster-whisper`), hoặc truyền transcript có sẵn bằng `--subtitles file.json`.
+> - Nếu chưa cài Whisper và không có transcript, hệ thống vẫn cắt theo khoảng lặng thật nhưng sẽ **không có phụ đề** (có cảnh báo trên màn hình).
+> - `--allow-mock` chỉ dùng để chạy thử: nó dùng transcript giả thay cho dữ liệu thật.
+> - Làn CapCut cần CapCut Desktop đã **tắt hẳn** lúc dựng; nếu engine CapCut lỗi, các làn Premiere/After Effects vẫn được xuất bình thường.
+
 ---
 
 ## 🛠️ Danh Sách Khẩu Lệnh Tiếng Việt

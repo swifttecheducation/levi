@@ -241,11 +241,14 @@ class VideoRenderer:
                 # Nếu GPU thất bại (do driver hoặc vram), thử lại bằng CPU libx264
                 if self.use_gpu:
                     print("  ⚠️ Thử lại bằng CPU libx264...")
-                    cmd[cmd.index("h264_nvenc") : cmd.index("h264_nvenc") + 5] = ["libx264", "-preset", "veryfast", "-crf", "20"]
-                    res2 = subprocess.run(cmd, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
-                    if res2.returncode == 0 and os.path.exists(output_path):
+                    # Dựng lại lệnh từ đầu với encoder CPU (trước đây cắt mảng sót lại "-b:v 8M" của NVENC).
+                    cpu_vcodec = ["-c:v", "libx264", "-preset", "veryfast", "-crf", "20"]
+                    cmd_cpu = cmd[:cmd.index("-c:v")] + cpu_vcodec + cmd[cmd.index("-pix_fmt"):]
+                    res2 = subprocess.run(cmd_cpu, stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
+                    if res2.returncode == 0 and os.path.exists(output_path) and os.path.getsize(output_path) > 0:
                         print(f"  🎉 Render thành công (CPU): {output_path}")
                         return True
+                    res = res2  # báo lỗi của lần chạy CPU, là lỗi gần nhất
                 print(f"  ❌ Lỗi khi render: {res.stderr[-400:]}")
                 return False
         except Exception as e:

@@ -15,8 +15,20 @@ Hỗ trợ đầy đủ:
 
 import os
 import xml.etree.ElementTree as ET
+from urllib.parse import quote
 from xml.dom import minidom
 from typing import List, Dict, Any, Optional
+
+
+def _path_to_file_url(path: str) -> str:
+    """
+    Đổi đường dẫn thành file URL đã mã hóa phần trăm (khoảng trắng, tiếng Việt có dấu...) để Premiere đọc được.
+    Windows: C:/a b/x.mp4 -> file://localhost/C:/a%20b/x.mp4   macOS/Linux: /Users/a/x.mp4 -> file://localhost/Users/a/x.mp4
+    """
+    p = os.path.abspath(path).replace("\\", "/")
+    if not p.startswith("/"):
+        p = "/" + p
+    return "file://localhost" + quote(p, safe="/:")
 
 
 class PremiereXMLBuilder:
@@ -45,7 +57,7 @@ class PremiereXMLBuilder:
         """
         abs_video_path = os.path.abspath(main_video_path).replace("\\", "/")
         file_name = os.path.basename(abs_video_path)
-        file_url = f"file://localhost/{abs_video_path.lstrip('/')}" if os.name == 'nt' else f"file://{abs_video_path}"
+        file_url = _path_to_file_url(abs_video_path)
 
         root = ET.Element("xmeml", version="4")
         project = ET.SubElement(root, "project")
@@ -96,12 +108,14 @@ class PremiereXMLBuilder:
             ET.SubElement(clipitem, "in").text = str(in_frame)
             ET.SubElement(clipitem, "out").text = str(out_frame)
 
-            # File Reference
+            # File Reference: chỉ định nghĩa đầy đủ ở clip đầu tiên, các clip sau chỉ tham chiếu theo id
+            # (chuẩn xmeml; lặp lại định nghĩa đầy đủ có thể khiến Premiere import ra nhiều media trùng).
             file_ref = ET.SubElement(clipitem, "file", id="file-main-video")
-            ET.SubElement(file_ref, "name").text = file_name
-            ET.SubElement(file_ref, "pathurl").text = file_url
-            f_rate = ET.SubElement(file_ref, "rate")
-            ET.SubElement(f_rate, "timebase").text = str(self.timebase)
+            if c_idx == 0:
+                ET.SubElement(file_ref, "name").text = file_name
+                ET.SubElement(file_ref, "pathurl").text = file_url
+                f_rate = ET.SubElement(file_ref, "rate")
+                ET.SubElement(f_rate, "timebase").text = str(self.timebase)
 
             timeline_cursor_frames += duration_frames
 
@@ -126,7 +140,7 @@ class PremiereXMLBuilder:
 
                 b_file = ET.SubElement(b_item, "file", id=f"file-broll-{b_idx + 1}")
                 ET.SubElement(b_file, "name").text = b_name
-                ET.SubElement(b_file, "pathurl").text = f"file://localhost/{b_path.lstrip('/')}" if os.name == 'nt' else f"file://{b_path}"
+                ET.SubElement(b_file, "pathurl").text = _path_to_file_url(b_path)
 
         # ----------------- AUDIO TRACK 1 (Dialogue) -----------------
         audio = ET.SubElement(media, "audio")

@@ -14,6 +14,7 @@ Phân tích 7 trụ cột từ brand-kit.md:
 
 import os
 import re
+import copy
 from typing import Dict, Any, List, Optional, Tuple
 
 
@@ -66,7 +67,7 @@ DEFAULT_BRAND_KIT = {
 class BrandEngine:
     def __init__(self, brand_kit_path: Optional[str] = None):
         self.brand_kit_path = brand_kit_path
-        self.brand = DEFAULT_BRAND_KIT.copy()
+        self.brand = copy.deepcopy(DEFAULT_BRAND_KIT)  # deepcopy: tránh sửa nhầm dict lồng nhau của bản mặc định
         if brand_kit_path and os.path.exists(brand_kit_path):
             self.load_from_markdown(brand_kit_path)
 
